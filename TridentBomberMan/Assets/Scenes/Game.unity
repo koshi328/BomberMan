@@ -135,7 +135,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4c8ecc9d9524f5418105ca804a1fdc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _blockPref: {fileID: 1614155601859698, guid: 6c7d46127465a084dbbf11e77963b148, type: 2}
+  _immutableBlockPref: {fileID: 1614155601859698, guid: 6c7d46127465a084dbbf11e77963b148,
+    type: 2}
+  _breakableBlockPref: {fileID: 1348181026596344, guid: bc1b1d52f25190247b008a2e28ac8d3b,
+    type: 2}
 --- !u!4 &357956904
 Transform:
   m_ObjectHideFlags: 0
@@ -198,7 +201,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.80784315, g: 0.9254902, b: 0.5803922, a: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -209,7 +212,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 8
+  orthographic size: 8.3
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
