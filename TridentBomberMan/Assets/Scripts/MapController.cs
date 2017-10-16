@@ -37,8 +37,8 @@ public class MapController : MonoBehaviour {
                 {
                     if (i % 2 == 1 || j % 2 == 1) continue;
                 }
-                float x = -WIDTH * CHIP_SIZE / 2 + j * CHIP_SIZE;
-                float y = -HEIGHT * CHIP_SIZE / 2 + i * CHIP_SIZE;
+                float x = -(WIDTH - 1) * CHIP_SIZE / 2 + j * CHIP_SIZE;
+                float y = -(HEIGHT - 1) * CHIP_SIZE / 2 + i * CHIP_SIZE;
                 Instantiate(_blockPref, new Vector3(x, y, 0), Quaternion.identity, this.transform);
                 _table[j, i] = STATE.IMMUTABLE;
             }
