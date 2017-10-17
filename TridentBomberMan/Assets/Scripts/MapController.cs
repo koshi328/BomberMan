@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class MapController : MonoBehaviour
 {
+    // チップの情報
     public enum STATE
     {
         NONE,           // 地面
@@ -20,13 +21,13 @@ public class MapController : MonoBehaviour
     }
 
     // 幅
-    readonly int WIDTH = 15;
+    static readonly int WIDTH = 15;
 
     // 高さ
-    readonly int HEIGHT = 13;
+    static readonly int HEIGHT = 13;
 
     // チップサイズ
-    readonly float CHIP_SIZE = 1.28f;
+    static readonly float CHIP_SIZE = 1.28f;
 
     [SerializeField, Header("破壊不可能ブロック")]
     GameObject _immutableBlockPref;
@@ -69,7 +70,7 @@ public class MapController : MonoBehaviour
     }
 
     /// <summary>
-    /// 初期化
+    /// 初期設定
     /// </summary>
     public void Init()
     {
@@ -77,7 +78,7 @@ public class MapController : MonoBehaviour
     }
 
     /// <summary>
-    /// オブジェクト生成
+    /// マップ上のブロック等のオブジェクト生成
     /// </summary>
     void CreateObjects()
     {
@@ -101,13 +102,51 @@ public class MapController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 指定されたチップの情報を返す
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
     public MapController.STATE GetChipState(int x, int y)
     {
-        if (x < 1) return STATE.IMMUTABLE_BLOCK;
-        if (WIDTH - 1 < x) return STATE.IMMUTABLE_BLOCK;
-        if (y < 1) return STATE.IMMUTABLE_BLOCK;
-        if (HEIGHT - 1 < y) return STATE.IMMUTABLE_BLOCK;
 
         return (STATE)_stage[y, x];
+    }
+
+    /// <summary>
+    /// 指定されたチップの情報を書き換える
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="state"></param>
+    public void SetChipState(int x, int y, MapController.STATE state)
+    {
+        if (x < 1) return;
+        if (WIDTH - 1 < x) return;
+        if (y < 1) return;
+        if (HEIGHT - 1 < y) return;
+
+        _stage[y, x] = (int)state;
+    }
+
+    /// <summary>
+    /// 指定されたチップの座標を返す
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
+    static public Vector3 GetChipPosition(int x, int y)
+    {
+        if (x < 1) return Vector3.zero;
+        if (WIDTH - 1 < x) return Vector3.zero;
+        if (y < 1) return Vector3.zero;
+        if (HEIGHT - 1 < y) return Vector3.zero;
+
+        Vector3 pos = Vector3.zero;
+        pos.x = -(WIDTH - 1) * CHIP_SIZE / 2 + x * CHIP_SIZE;
+        pos.y = -(HEIGHT - 1) * CHIP_SIZE / 2 + y * CHIP_SIZE;
+
+        return pos;
     }
 }
