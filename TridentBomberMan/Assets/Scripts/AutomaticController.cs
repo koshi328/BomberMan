@@ -8,25 +8,19 @@ public class AutomaticController : ControllerBase
     {
     }
 
-    public override void Update()
-    {
-        MoveControl();
-        SetBombControl();
-    }
-
     /// <summary>
     /// 操作に応じて移動処理を呼び出す関数
     /// </summary>
-    public override void MoveControl()
+    public override void ControlMove()
     {
-        base.MoveControl();
+        base.ControlMove();
     }
 
     /// <summary>
     /// 操作に応じてボム置き処理を呼び出す関数
     /// </summary>
-    public override void SetBombControl()
+    public override void ControlSetBomb()
     {
-        base.SetBombControl();
+        base.ControlSetBomb();
     }
 }

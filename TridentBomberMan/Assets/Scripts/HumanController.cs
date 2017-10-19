@@ -7,24 +7,18 @@ public class HumanController : ControllerBase
 	void Start ()
     {
 	}
-	
-	public override void Update ()
-    {
-        MoveControl();
-        SetBombControl();
-    }
 
     /// <summary>
     /// 操作に応じて移動処理を呼び出す関数
     /// </summary>
-    public override void MoveControl()
+    public override void ControlMove()
     {
         // 操作対象が移動中なら処理しない
         if (_player._action == Player.ACTION.MOVE) return;
 
-        base.MoveControl();
+        base.ControlMove();
 
-        ControllerBase.DIRECTION direction = ControllerBase.DIRECTION.NONE;
+        Player.DIRECTION direction = Player.DIRECTION.UP;
 
         // 入力を取得
         float xInput = Input.GetAxisRaw("Horizontal");
@@ -33,46 +27,67 @@ public class HumanController : ControllerBase
         // 縦方向の移動の入力がされていたら
         if (float.Epsilon < Mathf.Abs(yInput))
         {
-            if(yInput < 0)
+            if (yInput < 0)
             {
-                direction = ControllerBase.DIRECTION.DOWN;
-                Debug.Log("Pushed Down Key.");
+                direction = Player.DIRECTION.DOWN;
             }
             else
             {
-                direction = ControllerBase.DIRECTION.UP;
-                Debug.Log("Pushed Up Key.");
+                direction = Player.DIRECTION.UP;
             }
         }
-        else if(float.Epsilon < Mathf.Abs(xInput))
+        else if (float.Epsilon < Mathf.Abs(xInput))
         {
             if (xInput < 0)
             {
-                direction = ControllerBase.DIRECTION.LEFT;
-                Debug.Log("Pushed Left Key.");
+                direction = Player.DIRECTION.LEFT;
             }
             else
             {
-                direction = ControllerBase.DIRECTION.RIGHT;
-                Debug.Log("Pushed Right Key.");
+                direction = Player.DIRECTION.RIGHT;
             }
         }
         else
         {
             return;
         }
-        
+
+        //if(Input.GetKeyDown(KeyCode.LeftArrow))
+        //{
+        //    direction = Player.DIRECTION.LEFT;
+        //}
+        //else if(Input.GetKeyDown(KeyCode.RightArrow))
+        //{
+        //    direction = Player.DIRECTION.RIGHT;
+        //}
+        //else if(Input.GetKeyDown(KeyCode.UpArrow))
+        //{
+        //    direction = Player.DIRECTION.UP;
+        //}
+        //else if(Input.GetKeyDown(KeyCode.DownArrow))
+        //{
+        //    direction = Player.DIRECTION.DOWN;
+        //}
+        //else
+        //{
+        //    return;
+        //}
+
         // 移動処理
-        base.Move(direction);
+        _player.Move(direction);
     }
 
     /// <summary>
     /// 操作に応じてボム置き処理を呼び出す関数
     /// </summary>
-    public override void SetBombControl()
+    public override void ControlSetBomb()
     {
-        base.SetBombControl();
+        base.ControlSetBomb();
 
-
+        // ボタンが押されていたら
+        if (Input.GetButtonDown("SetBomb"))
+        {
+            _player.SetBomb();
+        }
     }
 }

@@ -62,11 +62,13 @@ public class BattleManager : MonoBehaviour
         // インスタンスから情報を取り出す
         for (int i = 0; i < _playerNum; i++)
         {
+            // 初期化だけだからGetComponent()許して
             _playerInfo[i] = _playerInstances[i].GetComponent<Player>();
 
             switch (i)
             {
                 case 0:
+                    _playerInfo[i].SetMap(_map);
                     _playerInfo[i].SetPosition(1, 1, false);
                     break;
             }
@@ -84,16 +86,17 @@ public class BattleManager : MonoBehaviour
                 _controllers[i] = new AutomaticController();
             }
 
-            _controllers[i].SetMap(_map);
             _controllers[i].SetPlayer(_playerInfo[i]);
         }
     }
 	
 	void Update ()
     {
+        _map.MyUpdate();
+
         for (int i = 0; i < _playerNum; i++)
         {
-            _controllers[i].Update();
+            _controllers[i].MyUpdate();
         }
     }
 }

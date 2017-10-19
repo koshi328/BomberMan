@@ -139,6 +139,8 @@ MonoBehaviour:
     type: 2}
   _breakableBlockPref: {fileID: 1348181026596344, guid: bc1b1d52f25190247b008a2e28ac8d3b,
     type: 2}
+  _bombPrefab: {fileID: 114430945190624272, guid: c12892fe3e044fe4bbb489bd334e41bb,
+    type: 2}
 --- !u!4 &357956904
 Transform:
   m_ObjectHideFlags: 0

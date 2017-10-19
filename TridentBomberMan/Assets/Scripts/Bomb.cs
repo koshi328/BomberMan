@@ -8,13 +8,10 @@ public class Bomb : MapObject
     public static readonly float LIMIT_TIME = 3.0f;
 
     // 爆発までの残り時間
-    private float _currentElapsedTime;
+    public float _currentElapsedTime;
 
     // 火力
-    private int _fireLevel;
-
-    // マップ情報
-    private MapController _map;
+    public int _fireLevel;
 
 
 
@@ -26,44 +23,33 @@ public class Bomb : MapObject
         // 爆発までの時間
         _currentElapsedTime = LIMIT_TIME;
     }
+
+    public void Init()
+    {
+        // 爆発までの時間
+        _currentElapsedTime = LIMIT_TIME;
+    }
 	
     /// <summary>
     /// 更新
     /// </summary>
-	void Update ()
+	public void MyUpdate ()
     {
         // 爆発までのカウントダウン
         _currentElapsedTime -= Time.deltaTime;
-
-        Explosion();
     }
 
     /// <summary>
     /// 生成した時に呼び出してもらう初期化
     /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
     /// <param name="fireLevel"></param>
-    /// <param name="map"></param>
-    public void Init(int fireLevel, MapController map)
+    public void Init(int x, int y, int fireLevel)
     {
-        SetFireLevel(fireLevel);
-        SetMap(map);
-    }
-
-    /// <summary>
-    /// 火力レベルを設定する
-    /// </summary>
-    void SetFireLevel(int fireLevel)
-    {
+        _position.x = x;
+        _position.y = y;
         _fireLevel = fireLevel;
-    }
-
-    /// <summary>
-    /// マップを知る
-    /// </summary>
-    /// <param name="map"></param>
-    void SetMap(MapController map)
-    {
-        _map = map;
     }
 
     /// <summary>
@@ -71,10 +57,17 @@ public class Bomb : MapObject
     /// </summary>
     void Explosion()
     {
-        // まだ爆発しないなら処理しない
-        if (0 < _currentElapsedTime) return;
+        // 爆発のアニメーション開始等をしたりする
 
-        // 爆発処理
+    }
 
+    public void SetActive(bool flag)
+    {
+        gameObject.SetActive(flag);
+    }
+
+    public bool GetActive()
+    {
+        return gameObject.activeSelf;
     }
 }
