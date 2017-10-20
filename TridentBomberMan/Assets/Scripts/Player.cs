@@ -30,12 +30,12 @@ public class Player : MapObject
 
     // 火力の最大レベル
     public static readonly int FIRE_MAX = 8;
-
-
+    
+    
     // マップ情報を取得するために持つ
     [SerializeField]
     protected MapController _map;
-
+    
     // 何Pか？
     public int _playerNumber { get; set; }
 
@@ -63,8 +63,8 @@ public class Player : MapObject
     public static readonly int CANSETMINE = 0x10;
     public static readonly int ISCONFUSION = 0x20;
     public static readonly int ISALIVE = 0x40;
-
-
+    
+    
     void Start ()
     {
         // 生存フラグを立てる
@@ -160,7 +160,6 @@ public class Player : MapObject
         item.InfluenceEffect(this);
         item.gameObject.SetActive(false);
     }
-
     /// <summary>
     /// ボムを置く
     /// </summary>

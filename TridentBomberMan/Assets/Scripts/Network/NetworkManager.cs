@@ -27,6 +27,7 @@ public class NetworkManager : Photon.PunBehaviour {
     public override void OnJoinedRoom()
     {
         Debug.Log("部屋に入りました");
+        PhotonNetwork.Instantiate("NetTestObject", Vector2.zero, Quaternion.identity, 0);
     }
 
 }
