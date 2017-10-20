@@ -45,16 +45,14 @@ public class Player : MapObject
         get;
         set;
     }
-
+    
     // マップ情報を取得するために持つ
     [SerializeField]
     protected MapController _map;
 
     [SerializeField]
     private int _fireLevel;
-
-
-
+    
     void Start ()
     {
         _state = STATE.NORMAL;
@@ -129,7 +127,6 @@ public class Player : MapObject
         // 操作対象を待機状態にする
         _action = Player.ACTION.STAY;
     }
-
     /// <summary>
     /// ボムを置く
     /// </summary>
