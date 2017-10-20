@@ -14,53 +14,77 @@ public class Player : MapObject
         LEFT,
     }
 
-    // 状態異常
+    // ステート
     public enum STATE
-    {
-        NORMAL,     // 健康
-        QUICK,      // クイック
-        SLOW,       // スロー
-        CONFUSION,  // 混乱
-        STATE_NUM,
-    }
-
-    // アクション
-    public enum ACTION
     {
         STAY,   // 待機
         MOVE,   // 移動中
         ACTION_NUM,
     }
 
+    // ボムの最大所持数
+    public static readonly int BOMB_MAX = 8;
 
+    // スピードの最大レベル
+    public static readonly int SPEED_MAX = 9;
 
-    public STATE _state
-    {
-        get;
-        set;
-    }
+    // 火力の最大レベル
+    public static readonly int FIRE_MAX = 8;
 
-    public ACTION _action
-    {
-        get;
-        set;
-    }
 
     // マップ情報を取得するために持つ
     [SerializeField]
     protected MapController _map;
 
-    [SerializeField]
-    private int _fireLevel;
+    // 何Pか？
+    public int _playerNumber { get; set; }
 
+    // 持てるボムの数
+    public int _maxBombNum { get; set; }
+
+    // ボムの今の所持数
+    public int _currentBombNum { get; set; }
+    
+    // 火力レベル
+    public int _fireLevel { get; set; }
+
+    // スピードレベル
+    public int _speedLevel { get; set; }
+
+    // ステート
+    public STATE _state { get; set; }
+
+    // フラグ
+    public int _flag = 0x00;
+    public static readonly int SLOW = 0x01;
+    public static readonly int QUICK = 0x02;
+    public static readonly int INVINCIBLE = 0x04;
+    public static readonly int KICKABLE = 0x08;
+    public static readonly int CANSETMINE = 0x10;
+    public static readonly int ISCONFUSION = 0x20;
+    public static readonly int ISALIVE = 0x40;
 
 
     void Start ()
     {
-        _state = STATE.NORMAL;
-        _action = ACTION.STAY;
-        _fireLevel = 2;
-	}
+        // 生存フラグを立てる
+        _flag |= ISALIVE;
+
+        // 待機状態にする
+        _state = STATE.STAY;
+
+        // ボムの最大所持数
+        _maxBombNum = 1;
+
+        // ボムの現在の所持数
+        _currentBombNum = 1;
+
+        // 火力レベル
+        _fireLevel = 1;
+
+        // スピードレベル
+        _speedLevel = 1;
+    }
 
     /// <summary>
     /// 移動
@@ -118,7 +142,7 @@ public class Player : MapObject
         Vector3 destinationPosition = MapController.GetChipPosition(destination.x, destination.y);
         transform.DOMove(destinationPosition, 0.1f).OnComplete(MovedCallback);
         SetPosition(destination.x, destination.y, true);
-        _action = ACTION.MOVE;
+        _state = STATE.MOVE;
     }
 
     /// <summary>
@@ -127,7 +151,14 @@ public class Player : MapObject
     protected void MovedCallback()
     {
         // 操作対象を待機状態にする
-        _action = Player.ACTION.STAY;
+        _state = Player.STATE.STAY;
+
+        // 移動したチップにアイテムがあれば取得する
+        Item item = _map.GetItem(_position.x, _position.y);
+        if (item == null) return;
+
+        item.InfluenceEffect(this);
+        item.gameObject.SetActive(false);
     }
 
     /// <summary>
@@ -135,7 +166,14 @@ public class Player : MapObject
     /// </summary>
     public void SetBomb()
     {
-        _map.SetBomb(GetPosition().x, GetPosition().y, _fireLevel);
+        // ボムが残っていなければおけない
+        if(_currentBombNum < 1)
+        {
+            return;
+        }
+
+        _currentBombNum--;
+        _map.SetBomb(_playerNumber, GetPosition().x, GetPosition().y, _fireLevel);
     }
 
     /// <summary>
@@ -144,5 +182,44 @@ public class Player : MapObject
     public void SetMap(MapController map)
     {
         _map = map;
+    }
+
+    /// <summary>
+    /// 死亡する
+    /// </summary>
+    public void Death()
+    {
+        // 消す
+        gameObject.SetActive(false);
+
+        // 生存フラグを折る
+        SetStatus(ISALIVE, false);
+    }
+
+    /// <summary>
+    /// フラグを変更する
+    /// </summary>
+    /// <param name="tag"></param>
+    /// <param name="flag"></param>
+    public void SetStatus(int tag, bool flag)
+    {
+        if(flag)
+        {
+            _flag |= tag;
+        }
+        else
+        {
+            _flag &=~tag;
+        }
+    }
+
+    /// <summary>
+    /// フラグを取得する
+    /// </summary>
+    /// <param name="tag"></param>
+    /// <returns></returns>
+    public bool GetStatus(int tag)
+    {
+        return (_flag & tag) != 0;
     }
 }

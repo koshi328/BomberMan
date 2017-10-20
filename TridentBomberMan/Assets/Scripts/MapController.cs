@@ -37,6 +37,9 @@ public class MapController : MonoBehaviour
     // ボムの最大数
     static readonly int BOMB_LIMIT_NUM = 50;
 
+    // アイテムの最大数
+    static readonly int ITEM_LIMIT_NUM = 50;
+
     [SerializeField, Header("破壊不可能ブロックのプレハブ")]
     GameObject _immutableBlockPref;
 
@@ -45,6 +48,9 @@ public class MapController : MonoBehaviour
 
     [SerializeField, Header("ボムのプレハブ")]
     Bomb _bombPrefab;
+
+    [SerializeField]
+    GameObject[] _itemPrefab = new GameObject[(int)Item.KIND.KIND_NUM];
 
     // シンプルステージのチップ情報
     readonly int[,] SIMPLE_STAGE =
@@ -70,10 +76,16 @@ public class MapController : MonoBehaviour
     int[,] _stage;
 
     // マップ上のブロックのインスタンス
-    Dictionary<int, GameObject> _objects = new Dictionary<int, GameObject>();
+    Dictionary<int, Block> _block = new Dictionary<int, Block>();
+
+    // アイテム
+    Item[] _item;
 
     // ボムのインスタンス
     Bomb[] _bomb;
+
+    [SerializeField]
+    BattleManager _battleManager;
 
 
     private void Awake()
@@ -95,6 +107,9 @@ public class MapController : MonoBehaviour
     /// </summary>
     void CreateObjects()
     {
+        
+        List<Block> array = new List<Block>();
+
         // マップのブロックの初期化
         for (int i = 0; i < HEIGHT; i++)
         {
@@ -106,14 +121,36 @@ public class MapController : MonoBehaviour
                 switch (_stage[i, j])
                 {
                     case (int)STATE.IMMUTABLE_BLOCK:
-                        _objects.Add(GetKey(j, i), Instantiate(_immutableBlockPref, new Vector3(x, y, 0), Quaternion.identity, this.transform));
+                        _block.Add(GetKey(j, i), Instantiate(_immutableBlockPref, new Vector3(x, y, 0), Quaternion.identity, this.transform).GetComponent<Block>());
                         break;
                     case (int)STATE.BREAKABLE_BLOCK:
-                        _objects.Add(GetKey(j, i), Instantiate(_breakableBlockPref, new Vector3(x, y, 0), Quaternion.identity, this.transform));
+                        _block.Add(GetKey(j, i), Instantiate(_breakableBlockPref, new Vector3(x, y, 0), Quaternion.identity, this.transform).GetComponent<Block>());
+                        _block[GetKey(j, i)].SetPosition(j, i, false);
+                        array.Add(_block[GetKey(j, i)]);
                         break;
                 }
             }
         }
+
+        // アイテムの初期化
+        for (int i = 0; i < array.Count; i++)
+        {
+            int elem = Random.Range(0, array.Count);
+            Block temp = array[i];
+            array[i] = array[elem];
+            array[elem] = temp;
+        }
+        int n = (int)(array.Count * 0.7f);
+        _item = new Item[n];
+        for (int i = 0; i < n; i++)
+        {
+            int m = 0;//Random.Range(0, (int)Item.KIND.KIND_NUM);
+            _item[i] = Instantiate(_itemPrefab[m], Vector3.zero, Quaternion.identity, transform).GetComponent<Item>();
+            _item[i].SetPosition(array[i].GetPosition().x, array[i].GetPosition().y, false);
+            array[i].SetItem(_item[i]);
+        }
+
+        array.Clear();
 
         // ボムの初期化
         _bomb = new Bomb[BOMB_LIMIT_NUM];
@@ -148,10 +185,11 @@ public class MapController : MonoBehaviour
     /// <summary>
     /// ボムを置く
     /// </summary>
+    /// <param name="playerNumber"></param>
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <param name="fireLevel"></param>
-    public void SetBomb(int x, int y, int fireLevel)
+    public void SetBomb(int playerNumber, int x, int y, int fireLevel)
     {
         for (int i = 0; i < BOMB_LIMIT_NUM; i++)
         {
@@ -163,7 +201,7 @@ public class MapController : MonoBehaviour
             _bomb[i]._fireLevel = fireLevel;
 
             // 座標の設定
-            _bomb[i].Init();
+            _bomb[i].Init(playerNumber, x, y, fireLevel);
             _bomb[i].SetPosition(x, y, false);
             _bomb[i].transform.position = GetChipPosition(x, y);
             SetChipState(x, y, STATE.BOMB);
@@ -182,6 +220,9 @@ public class MapController : MonoBehaviour
     /// <param name="fireLevel"></param>
     private void ExplodeBomb(Bomb bomb)
     {
+        // ボムの所持数を回復
+        _battleManager.GetPlayer(bomb._playerNumber)._currentBombNum++;
+
         MapController.Position bombPosition = bomb.GetPosition();
         int fireLevel = bomb._fireLevel;
         Vector2[] dir =
@@ -194,7 +235,7 @@ public class MapController : MonoBehaviour
 
         for (int i = 0; i < dir.Length; i++)
         {
-            for (int j = 1; j <= fireLevel; j++)
+            for (int j = 0; j < fireLevel + 1; j++)
             {
                 int x = (int)(bombPosition.x + (dir[i].x * j));
                 int y = (int)(bombPosition.y + (dir[i].y * j));
@@ -205,17 +246,24 @@ public class MapController : MonoBehaviour
                 switch ((STATE)_stage[y, x])
                 {
                     case STATE.NONE:
+                        for (int k = 0; k < _battleManager._playerNum; k++)
+                        {
+                            if (_battleManager.GetPlayer(k).GetPosition().x == x && _battleManager.GetPlayer(k).GetPosition().y == y)
+                            {
+                                _battleManager.GetPlayer(k).Death();
+                            }
+                        }
                         break;
                     case STATE.IMMUTABLE_BLOCK:
-                        j = fireLevel;
+                        j = fireLevel + 1;
                         break;
                     case STATE.BREAKABLE_BLOCK:
                         SetChipState(x, y, STATE.NONE);
-                        if (_objects[GetKey(x, y)] != null)
+                        if (_block[GetKey(x, y)] != null)
                         {
-                            Destroy(_objects[GetKey(x, y)]);
+                            Destroy(_block[GetKey(x, y)].gameObject);
                         }
-                        j = fireLevel;
+                        j = fireLevel + 1;
                         break;
                     case STATE.BOMB:
                         SetChipState(x, y, STATE.NONE);
@@ -226,12 +274,41 @@ public class MapController : MonoBehaviour
                                 _bomb[k].Detonate();
                             }
                         }
-                            break;
+                        for (int k = 0; k < _battleManager._playerNum; k++)
+                        {
+                            if (_battleManager.GetPlayer(k).GetPosition().x == x && _battleManager.GetPlayer(k).GetPosition().y == y)
+                            {
+                                _battleManager.GetPlayer(k).Death();
+                            }
+                        }
+                        break;
                 }
             }
             SetChipState(bombPosition.x, bombPosition.y, STATE.NONE);
             bomb.SetActive(false);
         }
+    }
+
+    /// <summary>
+    /// プレイヤーがアイテムを取得する
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
+    public Item GetItem(int x, int y)
+    {
+        for (int i = 0; i < _item.Length; i++)
+        {
+            if (_item[i].gameObject.GetActive() == false) continue;
+
+            if (x == _item[i].GetPosition().x &&
+               y == _item[i].GetPosition().y)
+            {
+                return _item[i];
+            }
+        }
+
+        return null;
     }
 
 

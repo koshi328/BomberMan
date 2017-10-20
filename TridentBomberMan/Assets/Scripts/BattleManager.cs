@@ -23,7 +23,11 @@ public class BattleManager : MonoBehaviour
 
     // プレイヤーキャラクターの数
     [SerializeField]
-    private int _playerNum;
+    public int _playerNum
+    {
+        get;
+        set;
+    }
 
     // 人間の数
     [SerializeField]
@@ -39,7 +43,7 @@ public class BattleManager : MonoBehaviour
     void Init()
     {
         // 設定シーンで設定した値を入れられるように後でする予定
-        _playerNum = 1;
+        _playerNum = 4;
         _humanNum = 1;
 
         // プレイヤーのインスタンスを生成
@@ -65,11 +69,25 @@ public class BattleManager : MonoBehaviour
             // 初期化だけだからGetComponent()許して
             _playerInfo[i] = _playerInstances[i].GetComponent<Player>();
 
+            _playerInfo[i]._playerNumber = i;
+
             switch (i)
             {
                 case 0:
                     _playerInfo[i].SetMap(_map);
                     _playerInfo[i].SetPosition(1, 1, false);
+                    break;
+                case 1:
+                    _playerInfo[i].SetMap(_map);
+                    _playerInfo[i].SetPosition(13, 11, false);
+                    break;
+                case 2:
+                    _playerInfo[i].SetMap(_map);
+                    _playerInfo[i].SetPosition(1, 11, false);
+                    break;
+                case 3:
+                    _playerInfo[i].SetMap(_map);
+                    _playerInfo[i].SetPosition(13, 1, false);
                     break;
             }
         }
@@ -98,5 +116,18 @@ public class BattleManager : MonoBehaviour
         {
             _controllers[i].MyUpdate();
         }
+    }
+
+    /// <summary>
+    /// プレイヤーの情報を返す
+    /// </summary>
+    /// <param name="n"></param>
+    /// <returns></returns>
+    public Player GetPlayer(int n)
+    {
+        if (n < 0) return null;
+        if (_playerNum < n) return null;
+
+        return _playerInfo[n];
     }
 }

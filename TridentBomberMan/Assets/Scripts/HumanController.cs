@@ -14,7 +14,7 @@ public class HumanController : ControllerBase
     public override void ControlMove()
     {
         // 操作対象が移動中なら処理しない
-        if (_player._action == Player.ACTION.MOVE) return;
+        if (_player._state == Player.STATE.MOVE) return;
 
         base.ControlMove();
 

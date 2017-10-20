@@ -13,6 +13,9 @@ public class AutomaticController : ControllerBase
     /// </summary>
     public override void ControlMove()
     {
+        // 操作対象が移動中なら処理しない
+        if (_player._state == Player.STATE.MOVE) return;
+
         base.ControlMove();
     }
 

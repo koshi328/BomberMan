@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Bomb : MapObject
 {
+    // 持ち主
+    public int _playerNumber { get; set; }
+
     // 爆発までの時間
     public static readonly float LIMIT_TIME = 3.0f;
 
@@ -24,32 +27,31 @@ public class Bomb : MapObject
         _currentElapsedTime = LIMIT_TIME;
     }
 
-    public void Init()
-    {
-        // 爆発までの時間
-        _currentElapsedTime = LIMIT_TIME;
-    }
-	
-    /// <summary>
-    /// 更新
-    /// </summary>
-	public void MyUpdate ()
-    {
-        // 爆発までのカウントダウン
-        _currentElapsedTime -= Time.deltaTime;
-    }
-
     /// <summary>
     /// 生成した時に呼び出してもらう初期化
     /// </summary>
+    /// <param name="playerNumber"></param>
     /// <param name="x"></param>
     /// <param name="y"></param>
     /// <param name="fireLevel"></param>
-    public void Init(int x, int y, int fireLevel)
+    public void Init(int playerNumber, int x, int y, int fireLevel)
     {
+        _playerNumber = playerNumber;
         _position.x = x;
         _position.y = y;
         _fireLevel = fireLevel;
+
+        // 爆発までの時間
+        _currentElapsedTime = LIMIT_TIME;
+    }
+
+    /// <summary>
+    /// 更新
+    /// </summary>
+    public void MyUpdate ()
+    {
+        // 爆発までのカウントダウン
+        _currentElapsedTime -= Time.deltaTime;
     }
 
     /// <summary>

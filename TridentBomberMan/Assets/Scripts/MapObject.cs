@@ -5,7 +5,7 @@ using UnityEngine;
 public class MapObject : MonoBehaviour
 {
     // マップ上での座標
-    protected MapController.Position _position;
+    protected MapController.Position _position = new MapController.Position(0, 0);
 
 
 
@@ -14,7 +14,6 @@ public class MapObject : MonoBehaviour
     /// </summary>
     void Awake ()
     {
-        _position = new MapController.Position(0, 0);
 	}
 
     /// <summary>
