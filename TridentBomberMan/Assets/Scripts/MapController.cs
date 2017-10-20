@@ -138,7 +138,6 @@ public class MapController : MonoBehaviour
 
                 if (_bomb[i]._currentElapsedTime < 0)
                 {
-                    Debug.Log("explode");
                     ExplodeBomb(_bomb[i]);
                 }
             }
@@ -220,7 +219,14 @@ public class MapController : MonoBehaviour
                         break;
                     case STATE.BOMB:
                         SetChipState(x, y, STATE.NONE);
-                        break;
+                        for (int k = 0; k < _bomb.Length; k++)
+                        {
+                            if (_bomb[k].GetPosition().x == x && _bomb[k].GetPosition().y == y)
+                            {
+                                _bomb[k].Detonate();
+                            }
+                        }
+                            break;
                 }
             }
             SetChipState(bombPosition.x, bombPosition.y, STATE.NONE);

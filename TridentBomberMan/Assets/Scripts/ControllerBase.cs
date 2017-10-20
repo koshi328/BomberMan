@@ -41,8 +41,6 @@ public class ControllerBase
     /// <param name="player"></param>
     public void SetPlayer(Player player)
     {
-        Debug.Log("Player was set.");
-
         _player = player;
     }
 }

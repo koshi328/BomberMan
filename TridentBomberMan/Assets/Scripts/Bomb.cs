@@ -70,4 +70,9 @@ public class Bomb : MapObject
     {
         return gameObject.activeSelf;
     }
+
+    public void Detonate()
+    {
+        _currentElapsedTime = 0.1f;
+    }
 }
