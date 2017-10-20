@@ -31,7 +31,7 @@ public class BattleManager : MonoBehaviour
 
 
 
-    void Start ()
+    void Awake ()
     {
         Init();
     }

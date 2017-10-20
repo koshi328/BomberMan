@@ -59,7 +59,7 @@ public class Player : MapObject
     {
         _state = STATE.NORMAL;
         _action = ACTION.STAY;
-        _fireLevel = 1;
+        _fireLevel = 2;
 	}
 
     /// <summary>
@@ -70,9 +70,7 @@ public class Player : MapObject
     {
         // 現在地を取得
         MapController.Position currentPosition = GetPosition();
-        MapController.Position destination;
-        destination.x = 0;
-        destination.y = 0;
+        MapController.Position destination = new MapController.Position(0, 0);
 
         // チップの情報を保存するための変数とりあえず破壊不可能ブロック
         MapController.STATE state = MapController.STATE.IMMUTABLE_BLOCK;

@@ -14,8 +14,13 @@ public class MapController : MonoBehaviour
     }
 
     // 座標
-    public struct Position
+    public class Position
     {
+        public Position(int a, int b)
+        {
+            x = a;
+            y = b;
+        }
         public int x;
         public int y;
     }
@@ -64,15 +69,14 @@ public class MapController : MonoBehaviour
     // 現在のチップ情報
     int[,] _stage;
 
+    // マップ上のブロックのインスタンス
+    Dictionary<int, GameObject> _objects = new Dictionary<int, GameObject>();
+
     // ボムのインスタンス
     Bomb[] _bomb;
 
 
-
-    /// <summary>
-    /// 初期化
-    /// </summary>
-    void Start ()
+    private void Awake()
     {
         Init();
     }
@@ -84,6 +88,40 @@ public class MapController : MonoBehaviour
     {
         _stage = SIMPLE_STAGE;
         CreateObjects();
+    }
+
+    /// <summary>
+    /// マップ上のブロック等のオブジェクト生成
+    /// </summary>
+    void CreateObjects()
+    {
+        // マップのブロックの初期化
+        for (int i = 0; i < HEIGHT; i++)
+        {
+            for (int j = 0; j < WIDTH; j++)
+            {
+                float x = -(WIDTH - 1) * CHIP_SIZE / 2 + j * CHIP_SIZE;
+                float y = -(HEIGHT - 1) * CHIP_SIZE / 2 + i * CHIP_SIZE;
+
+                switch (_stage[i, j])
+                {
+                    case (int)STATE.IMMUTABLE_BLOCK:
+                        _objects.Add(GetKey(j, i), Instantiate(_immutableBlockPref, new Vector3(x, y, 0), Quaternion.identity, this.transform));
+                        break;
+                    case (int)STATE.BREAKABLE_BLOCK:
+                        _objects.Add(GetKey(j, i), Instantiate(_breakableBlockPref, new Vector3(x, y, 0), Quaternion.identity, this.transform));
+                        break;
+                }
+            }
+        }
+
+        // ボムの初期化
+        _bomb = new Bomb[BOMB_LIMIT_NUM];
+        for (int i = 0; i < BOMB_LIMIT_NUM; i++)
+        {
+            _bomb[i] = Instantiate<Bomb>(_bombPrefab, Vector3.zero, Quaternion.identity, transform);
+            _bomb[i].SetActive(false);
+        }
     }
 
     /// <summary>
@@ -104,40 +142,6 @@ public class MapController : MonoBehaviour
                     ExplodeBomb(_bomb[i]);
                 }
             }
-        }
-    }
-
-    /// <summary>
-    /// マップ上のブロック等のオブジェクト生成
-    /// </summary>
-    void CreateObjects()
-    {
-        // マップのブロックの初期化
-        for (int i = 0; i < HEIGHT; i++)
-        {
-            for (int j = 0; j < WIDTH; j++)
-            {
-                float x = -(WIDTH - 1) * CHIP_SIZE / 2 + j * CHIP_SIZE;
-                float y = -(HEIGHT - 1) * CHIP_SIZE / 2 + i * CHIP_SIZE;
-
-                switch (_stage[i, j])
-                {
-                    case (int)STATE.IMMUTABLE_BLOCK:
-                        Instantiate(_immutableBlockPref, new Vector3(x, y, 0), Quaternion.identity, this.transform);
-                        break;
-                    case (int)STATE.BREAKABLE_BLOCK:
-                        Instantiate(_breakableBlockPref, new Vector3(x, y, 0), Quaternion.identity, this.transform);
-                        break;
-                }
-            }
-        }
-
-        // ボムの初期化
-        _bomb = new Bomb[BOMB_LIMIT_NUM];
-        for(int i = 0; i < BOMB_LIMIT_NUM; i++)
-        {
-            _bomb[i] = Instantiate<Bomb>(_bombPrefab, Vector3.zero, Quaternion.identity, transform);
-            _bomb[i].SetActive(false);
         }
     }
 
@@ -181,54 +185,56 @@ public class MapController : MonoBehaviour
     {
         MapController.Position bombPosition = bomb.GetPosition();
         int fireLevel = bomb._fireLevel;
-
-        for(int y = bombPosition.y - fireLevel; y <= bombPosition.y + fireLevel; y++)
+        Vector2[] dir =
         {
-            // 横列爆発
-            if (y == bombPosition.y)
-            {
-                for (int x = bombPosition.x - fireLevel; x <= bombPosition.x + fireLevel; x++)
-                {
-                    if (IsOutOfRange(x, y))
-                        continue;
+            new Vector2( 0, 1),
+            new Vector2( 0,-1),
+            new Vector2( 1, 0),
+            new Vector2(-1, 0),
+        };
 
-                    switch (_stage[y, x])
-                    {
-                        case (int)STATE.NONE:
-                            break;
-                        case (int)STATE.IMMUTABLE_BLOCK:
-                            break;
-                        case (int)STATE.BREAKABLE_BLOCK:
-                            SetChipState(x, y, STATE.NONE);
-                            break;
-                        case (int)STATE.BOMB:
-                            SetChipState(x, y, STATE.NONE);
-                            break;
-                    }
+        for (int i = 0; i < dir.Length; i++)
+        {
+            for (int j = 1; j <= fireLevel; j++)
+            {
+                int x = (int)(bombPosition.x + (dir[i].x * j));
+                int y = (int)(bombPosition.y + (dir[i].y * j));
+
+                if (IsOutOfRange(x, y))
+                    continue;
+
+                switch ((STATE)_stage[y, x])
+                {
+                    case STATE.NONE:
+                        break;
+                    case STATE.IMMUTABLE_BLOCK:
+                        j = fireLevel;
+                        break;
+                    case STATE.BREAKABLE_BLOCK:
+                        SetChipState(x, y, STATE.NONE);
+                        if (_objects[GetKey(x, y)] != null)
+                        {
+                            Destroy(_objects[GetKey(x, y)]);
+                        }
+                        j = fireLevel;
+                        break;
+                    case STATE.BOMB:
+                        SetChipState(x, y, STATE.NONE);
+                        break;
                 }
             }
-
-            if (IsOutOfRange(bombPosition.x, y))
-                continue;
-
-            switch (_stage[y, bombPosition.x])
-            {
-                case (int)STATE.NONE:
-                    break;
-                case (int)STATE.IMMUTABLE_BLOCK:
-                    break;
-                case (int)STATE.BREAKABLE_BLOCK:
-                    SetChipState(bombPosition.x, y, STATE.NONE);
-                    break;
-                case (int)STATE.BOMB:
-                    SetChipState(bombPosition.x, y, STATE.NONE);
-                    break;
-            }
+            SetChipState(bombPosition.x, bombPosition.y, STATE.NONE);
+            bomb.SetActive(false);
         }
-
-        bomb.SetActive(false);
     }
 
+
+    /// <summary>
+    /// 配列の外か？
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
     public bool IsOutOfRange(int x, int y)
     {
         if (x < 1) return true;
@@ -281,5 +287,10 @@ public class MapController : MonoBehaviour
         pos.y = -(HEIGHT - 1) * CHIP_SIZE / 2 + y * CHIP_SIZE;
 
         return pos;
+    }
+
+    static public int GetKey(int x, int y)
+    {
+        return x * 100 + y;
     }
 }

@@ -12,9 +12,9 @@ public class MapObject : MonoBehaviour
     /// <summary>
     /// 初期化
     /// </summary>
-    void Start ()
+    void Awake ()
     {
-
+        _position = new MapController.Position(0, 0);
 	}
 
     /// <summary>
