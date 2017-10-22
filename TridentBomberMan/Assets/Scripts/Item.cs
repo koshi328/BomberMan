@@ -39,43 +39,44 @@ public class Item : MapObject
 
     }
 
-    public void InfluenceEffect(Player _player)
+    public void InfluenceEffect(Player player)
     {
         switch(_kind)
         {
             case KIND.SPEED_UP:
-                _player._speedLevel++;
+                player._speedLevel++;
                 break;
-            case KIND.FIRE_UP:
-                _player._fireLevel++;
+		case KIND.FIRE_UP:
+			player._fireLevel = player._fireLevel + 1;
                 break;
             case KIND.FIRE_FULL:
-                _player._fireLevel = Player.FIRE_MAX;
+                player._fireLevel = Player.FIRE_MAX;
                 break;
-            case KIND.BOMB_UP:
-                _player._maxBombNum++;
+		case KIND.BOMB_UP:
+			player._maxBombNum = player._maxBombNum + 1;
+			player._currentBombNum = player._currentBombNum + 1;
                 break;
             case KIND.BOMB_KICK:
-                _player.SetStatus(Player.KICKABLE, true);
+                player.SetStatus(Player.KICKABLE, true);
                 break;
             case KIND.BOMB_MINE:
-                _player.SetStatus(Player.CANSETMINE, true);
+                player.SetStatus(Player.CANSETMINE, true);
                 break;
             case KIND.INVINCIBLE:
-                _player.SetStatus(Player.INVINCIBLE, true);
+                player.SetStatus(Player.INVINCIBLE, true);
                 break;
             case KIND.DOKURO:
                 int n = Random.Range(1, 3);
                 switch(n)
                 {
                     case 1:
-                        _player.SetStatus(Player.SLOW, true);
+                        player.SetStatus(Player.SLOW, true);
                         break;
                     case 2:
-                        _player.SetStatus(Player.QUICK, true);
+                        player.SetStatus(Player.QUICK, true);
                         break;
                     case 3:
-                        _player.SetStatus(Player.ISCONFUSION, true);
+                        player.SetStatus(Player.ISCONFUSION, true);
                         break;
                 }
                 break;

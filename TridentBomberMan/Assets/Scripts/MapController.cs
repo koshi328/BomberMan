@@ -144,7 +144,7 @@ public class MapController : MonoBehaviour
         _item = new Item[n];
         for (int i = 0; i < n; i++)
         {
-            int m = 0;//Random.Range(0, (int)Item.KIND.KIND_NUM);
+            int m = Random.Range(0, (int)Item.KIND.KIND_NUM - 1);
             _item[i] = Instantiate(_itemPrefab[m], Vector3.zero, Quaternion.identity, transform).GetComponent<Item>();
             _item[i].SetPosition(array[i].GetPosition().x, array[i].GetPosition().y, false);
             array[i].SetItem(_item[i]);
