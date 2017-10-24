@@ -17,6 +17,7 @@ public class ControllerBase
     {
         if (_player.GetStatus(Player.ISALIVE) == false) return;
 
+        _player.MyUpdate();
         ControlMove();
         ControlSetBomb();
     }

@@ -5,15 +5,6 @@ using DG.Tweening;
 
 public class Player : MapObject
 {
-    // 移動方向
-    public enum DIRECTION
-    {
-        UP,
-        DOWN,
-        RIGHT,
-        LEFT,
-    }
-
     // ステート
     public enum STATE
     {
@@ -30,12 +21,20 @@ public class Player : MapObject
 
     // 火力の最大レベル
     public static readonly int FIRE_MAX = 8;
-    
-    
+
+    // 混乱の時間
+    public static readonly float DOKURO_TIME = 7.0f;
+
+    // すり抜けの時間
+    public static readonly float INVINCIBLE_TIME = 10.0f;
+
+    // 気絶の時間
+    public static readonly float STAN_TIME = 1.0f;
+
     // マップ情報を取得するために持つ
     [SerializeField]
     protected MapController _map;
-    
+
     // 何Pか？
     public int _playerNumber { get; set; }
 
@@ -44,7 +43,7 @@ public class Player : MapObject
 
     // ボムの今の所持数
     public int _currentBombNum { get; set; }
-    
+
     // 火力レベル
     public int _fireLevel { get; set; }
 
@@ -54,8 +53,17 @@ public class Player : MapObject
     // ステート
     public STATE _state { get; set; }
 
+    // ドクロ用のタイマー
+    private float _dokuroTimer;
+
+    // すり抜け用のタイマー
+    private float _invincibleTimer;
+
+    // 気絶用のタイマー
+    private float _stanTimer;
+
     // フラグ
-    public int _flag = 0x00;
+    private int _flag = 0x00;
     public static readonly int SLOW = 0x01;
     public static readonly int QUICK = 0x02;
     public static readonly int INVINCIBLE = 0x04;
@@ -63,12 +71,14 @@ public class Player : MapObject
     public static readonly int CANSETMINE = 0x10;
     public static readonly int ISCONFUSION = 0x20;
     public static readonly int ISALIVE = 0x40;
-    
-    
-    void Start ()
+    public static readonly int ISSTAN = 0x80;
+
+
+    void Start()
     {
         // 生存フラグを立てる
         _flag |= ISALIVE;
+        SetStatus(KICKABLE, true);
 
         // 待機状態にする
         _state = STATE.STAY;
@@ -84,47 +94,101 @@ public class Player : MapObject
 
         // スピードレベル
         _speedLevel = 1;
+
+        // ドクロのタイマーの初期化
+        _dokuroTimer = DOKURO_TIME;
+
+        // すり抜けのタイマーの初期化
+        _invincibleTimer = INVINCIBLE_TIME;
     }
+
+    public void MyUpdate()
+    {
+        if (GetStatus(INVINCIBLE))
+        {
+            _invincibleTimer -= Time.deltaTime;
+
+            if (_invincibleTimer < 0.0f)
+            {
+                SetStatus(INVINCIBLE, false);
+                _invincibleTimer = INVINCIBLE_TIME;
+            }
+        }
+
+        if (GetStatus(SLOW))
+        {
+            _dokuroTimer -= Time.deltaTime;
+
+            if (_dokuroTimer < 0.0f)
+            {
+                SetStatus(SLOW, false);
+                _dokuroTimer = DOKURO_TIME;
+            }
+        }
+        else if (GetStatus(QUICK))
+        {
+            _dokuroTimer -= Time.deltaTime;
+
+            if (_dokuroTimer < 0.0f)
+            {
+                SetStatus(QUICK, false);
+                _dokuroTimer = DOKURO_TIME;
+            }
+        }
+        else if (GetStatus(ISCONFUSION))
+        {
+            _dokuroTimer -= Time.deltaTime;
+
+            if (_dokuroTimer < 0.0f)
+            {
+                SetStatus(ISCONFUSION, false);
+                _dokuroTimer = DOKURO_TIME;
+            }
+        }
+
+        if (GetStatus(ISSTAN))
+        {
+            _stanTimer -= Time.deltaTime;
+
+            if (_stanTimer < 0.0f)
+            {
+                SetStatus(ISSTAN, false);
+                _stanTimer = STAN_TIME;
+            }
+        }
+    }
+
 
     /// <summary>
     /// 移動
     /// </summary>
     /// <param name="direction"></param>
-    public void Move(DIRECTION direction)
+    public void Move(Vector2 direction)
     {
+        // 気絶中なら処理しない
+        if (GetStatus(ISSTAN)) return;
+
         // 現在地を取得
         MapController.Position currentPosition = GetPosition();
-        MapController.Position destination = new MapController.Position(0, 0);
+        MapController.Position destination = new MapController.Position(currentPosition.x, currentPosition.y);
+
+        // 混乱状態なら移動方向を逆にする
+        if (GetStatus(ISCONFUSION))
+        {
+            direction.x *= -1.0f;
+            direction.y *= -1.0f;
+        }
 
         // チップの情報を保存するための変数とりあえず破壊不可能ブロック
         MapController.STATE state = MapController.STATE.IMMUTABLE_BLOCK;
 
-        // 移動方向
-        switch (direction)
-        {
-            case DIRECTION.UP:
-                destination.y = 1;
-                break;
-            case DIRECTION.DOWN:
-                destination.y = -1;
-                break;
-            case DIRECTION.RIGHT:
-                destination.x = 1;
-                break;
-            case DIRECTION.LEFT:
-                destination.x = -1;
-                break;
-            default:
-                break;
-        }
-
         // 目的地を計算
-        destination.x += currentPosition.x;
-        destination.y += currentPosition.y;
+        destination.x += (int)(direction.x);
+        destination.y += (int)(direction.y);
 
         // 目的地のチップ情報を取得する
         state = _map.GetChipState(destination.x, destination.y);
-        
+
         // 移動可能なマスの場合はbreak、不可能なら以下を処理しない為にreturn
         switch (state)
         {
@@ -135,6 +199,11 @@ public class Player : MapObject
             case MapController.STATE.BREAKABLE_BLOCK:
                 return;
             case MapController.STATE.BOMB:
+                // 目的地にボムがあって、キック可能ならキック！
+                if (GetStatus(KICKABLE))
+                {
+                    _map.MoveBomb(destination.x, destination.y, direction);
+                }
                 return;
         }
 
@@ -160,13 +229,14 @@ public class Player : MapObject
         item.InfluenceEffect(this);
         item.gameObject.SetActive(false);
     }
+
     /// <summary>
     /// ボムを置く
     /// </summary>
     public void SetBomb()
     {
         // ボムが残っていなければおけない
-        if(_currentBombNum < 1)
+        if (_currentBombNum < 1)
         {
             return;
         }
@@ -202,13 +272,13 @@ public class Player : MapObject
     /// <param name="flag"></param>
     public void SetStatus(int tag, bool flag)
     {
-        if(flag)
+        if (flag)
         {
             _flag |= tag;
         }
         else
         {
-            _flag &=~tag;
+            _flag &= ~tag;
         }
     }
 

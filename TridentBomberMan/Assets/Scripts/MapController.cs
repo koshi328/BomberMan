@@ -59,7 +59,7 @@ public class MapController : MonoBehaviour
         {1,0,0,2,2, 2,2,2,2,2, 2,2,0,0,1},
         {1,0,1,2,1, 2,1,2,1,2, 1,2,1,0,1},
         {1,0,2,2,2, 2,2,2,2,2, 2,2,2,2,1},
-        {1,2,1,2,1, 2,1,2,1,2, 1,2,1,2,1},
+        {1,0,1,2,1, 2,1,2,1,2, 1,2,1,2,1},
 
         {1,2,2,2,2, 2,2,2,2,2, 2,2,2,2,1},
         {1,2,1,2,1, 2,1,2,1,2, 1,2,1,2,1},
@@ -214,6 +214,24 @@ public class MapController : MonoBehaviour
     }
 
     /// <summary>
+    /// ボムの移動
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="direction"></param>
+    public void MoveBomb(int x, int y, Vector2 direction)
+    {
+        // 指定された爆弾を探す
+        for (int i = 0; i < _bomb.Length; i++)
+        {
+            if (_bomb[i].GetPosition().x == x && _bomb[i].GetPosition().y == y)
+            {
+                _bomb[i].Move(direction, this, _battleManager);
+            }
+        }
+    }
+
+    /// <summary>
     /// ボムの爆発
     /// </summary>
     /// <param name="position"></param>
@@ -243,14 +261,26 @@ public class MapController : MonoBehaviour
                 if (IsOutOfRange(x, y))
                     continue;
 
-                switch ((STATE)_stage[y, x])
+                    switch ((STATE)_stage[y, x])
                 {
                     case STATE.NONE:
+                        // プレイヤーとの当たり判定
                         for (int k = 0; k < _battleManager._playerNum; k++)
                         {
                             if (_battleManager.GetPlayer(k).GetPosition().x == x && _battleManager.GetPlayer(k).GetPosition().y == y)
                             {
                                 _battleManager.GetPlayer(k).Death();
+                            }
+                        }
+
+                        // アイテムとの当たり判定
+                        for (int k = 0; k < _item.Length; k++)
+                        {
+                            if (_item[k].gameObject.GetActive() == false) continue;
+
+                            if (_item[k].GetPosition().x == x && _item[k].GetPosition().y == y)
+                            {
+                                _item[k].gameObject.SetActive(false);
                             }
                         }
                         break;
@@ -259,6 +289,7 @@ public class MapController : MonoBehaviour
                         break;
                     case STATE.BREAKABLE_BLOCK:
                         SetChipState(x, y, STATE.NONE);
+                        // 破壊可能ブロックとの当たり判定
                         if (_block[GetKey(x, y)] != null)
                         {
                             Destroy(_block[GetKey(x, y)].gameObject);
@@ -267,18 +298,20 @@ public class MapController : MonoBehaviour
                         break;
                     case STATE.BOMB:
                         SetChipState(x, y, STATE.NONE);
-                        for (int k = 0; k < _bomb.Length; k++)
-                        {
-                            if (_bomb[k].GetPosition().x == x && _bomb[k].GetPosition().y == y)
-                            {
-                                _bomb[k].Detonate();
-                            }
-                        }
+                        // プレイヤーとの当たり判定
                         for (int k = 0; k < _battleManager._playerNum; k++)
                         {
                             if (_battleManager.GetPlayer(k).GetPosition().x == x && _battleManager.GetPlayer(k).GetPosition().y == y)
                             {
                                 _battleManager.GetPlayer(k).Death();
+                            }
+                        }
+                        // 他の爆弾との当たり判定
+                        for (int k = 0; k < _bomb.Length; k++)
+                        {
+                            if (_bomb[k].GetPosition().x == x && _bomb[k].GetPosition().y == y)
+                            {
+                                _bomb[k].Detonate();
                             }
                         }
                         break;

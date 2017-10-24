@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class Bomb : MapObject
 {
@@ -16,7 +17,8 @@ public class Bomb : MapObject
     // 火力
     public int _fireLevel;
 
-
+    private MapController _map;
+    private BattleManager _battleManager;
 
     /// <summary>
     /// 初期化
@@ -52,6 +54,68 @@ public class Bomb : MapObject
     {
         // 爆発までのカウントダウン
         _currentElapsedTime -= Time.deltaTime;
+    }
+
+    /// <summary>
+    /// 移動
+    /// </summary>
+    /// <param name="direction"></param>
+    /// <param name="map"></param>
+    public void Move(Vector2 direction, MapController map, BattleManager battleManager)
+    {
+        if (!_map) _map = map;
+        if (!_battleManager) _battleManager = battleManager;
+
+        // 目的地を計算
+        MapController.Position destination = new MapController.Position(_position.x, _position.y);
+        destination.x += (int)(direction.x);
+        destination.y += (int)(direction.y);
+
+        // チップの情報を取得
+        MapController.STATE state = map.GetChipState(destination.x, destination.y);
+        
+        // 移動可能な場合以外は処理しない
+        switch (state)
+        {
+            case MapController.STATE.NONE:
+                break;
+            case MapController.STATE.IMMUTABLE_BLOCK:
+                return;
+            case MapController.STATE.BREAKABLE_BLOCK:
+                return;
+            case MapController.STATE.BOMB:
+                return;
+        }
+
+        // プレイヤーの情報を取得
+        for (int i = 0; i < battleManager._playerNum; i++)
+        {
+            Player player = battleManager.GetPlayer(i);
+
+            // プレイヤーに当たったら
+            if(player.GetPosition().x == destination.x &&
+                player.GetPosition().y == destination.y)
+            {
+                player.SetStatus(Player.ISSTAN, true);
+            }
+        }
+
+        // チップが移動可能なマスなら移動
+        Vector3 destinationPosition = MapController.GetChipPosition(destination.x, destination.y);
+        transform.DOMove(destinationPosition, 0.1f).OnComplete(() => {
+            // アニメーションが終了時によばれる
+            _map.SetChipState(_position.x, _position.y, MapController.STATE.NONE);
+            _map.SetChipState(destination.x, destination.y, MapController.STATE.BOMB);
+            SetPosition(destination.x, destination.y, true);
+            Move(direction, _map, _battleManager);
+        });
+    }
+
+    /// <summary>
+    /// 移動が完了した時に呼ばれるコールバック
+    /// </summary>
+    protected void MovedCallback()
+    {
     }
 
     /// <summary>

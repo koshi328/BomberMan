@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class BattleManager : MonoBehaviour
 {
@@ -37,6 +38,9 @@ public class BattleManager : MonoBehaviour
 
     void Awake ()
     {
+        DOTween.Init();    // ← コレないと効かない
+        DOTween.defaultEaseType = Ease.InOutQuad;
+
         Init();
     }
 

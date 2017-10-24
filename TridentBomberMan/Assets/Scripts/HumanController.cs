@@ -18,7 +18,7 @@ public class HumanController : ControllerBase
 
         base.ControlMove();
 
-        Player.DIRECTION direction = Player.DIRECTION.UP;
+        Vector2 direction = Vector2.zero;
 
         // 入力を取得
         float xInput = Input.GetAxisRaw("Horizontal");
@@ -29,22 +29,22 @@ public class HumanController : ControllerBase
         {
             if (yInput < 0)
             {
-                direction = Player.DIRECTION.DOWN;
+                direction = Vector2.down;
             }
             else
             {
-                direction = Player.DIRECTION.UP;
+                direction = Vector2.up;
             }
         }
         else if (float.Epsilon < Mathf.Abs(xInput))
         {
             if (xInput < 0)
             {
-                direction = Player.DIRECTION.LEFT;
+                direction = Vector2.left;
             }
             else
             {
-                direction = Player.DIRECTION.RIGHT;
+                direction = Vector2.right;
             }
         }
         else
