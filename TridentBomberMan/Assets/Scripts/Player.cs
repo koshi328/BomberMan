@@ -17,7 +17,7 @@ public class Player : MapObject
     public static readonly int BOMB_MAX = 8;
 
     // スピードの最大レベル
-    public static readonly int SPEED_MAX = 9;
+    public static readonly int SPEED_MAX = 8;
 
     // 火力の最大レベル
     public static readonly int FIRE_MAX = 8;
@@ -36,19 +36,21 @@ public class Player : MapObject
     protected MapController _map;
 
     // 何Pか？
-    public int _playerNumber { get; set; }
+    public int _playerNumber;
 
     // 持てるボムの数
-    public int _maxBombNum { get; set; }
+    public int _maxBombNum;
 
     // ボムの今の所持数
-    public int _currentBombNum { get; set; }
+    public int _currentBombNum;
 
     // 火力レベル
-    public int _fireLevel { get; set; }
+    [SerializeField]
+    public int _fireLevel;
 
     // スピードレベル
-    public int _speedLevel { get; set; }
+    [SerializeField]
+    public int _speedLevel;
 
     // ステート
     public STATE _state { get; set; }
@@ -68,32 +70,32 @@ public class Player : MapObject
     public static readonly int QUICK = 0x02;
     public static readonly int INVINCIBLE = 0x04;
     public static readonly int KICKABLE = 0x08;
-    public static readonly int CANSETMINE = 0x10;
-    public static readonly int ISCONFUSION = 0x20;
-    public static readonly int ISALIVE = 0x40;
-    public static readonly int ISSTAN = 0x80;
+    public static readonly int ISCONFUSION = 0x10;
+    public static readonly int ISALIVE = 0x20;
+    public static readonly int ISSTAN = 0x40;
 
+    public static readonly float MOVE_TIME_LEVEL_ONE = 0.5f;
+    public static readonly float MOVE_TIME_INTERVAL = 0.05f;
 
     void Start()
     {
         // 生存フラグを立てる
         _flag |= ISALIVE;
-        SetStatus(KICKABLE, true);
 
         // 待機状態にする
         _state = STATE.STAY;
 
         // ボムの最大所持数
-        _maxBombNum = 1;
+        _maxBombNum = 8;
 
         // ボムの現在の所持数
-        _currentBombNum = 1;
+        _currentBombNum = _maxBombNum;
 
         // 火力レベル
-        _fireLevel = 1;
+        _fireLevel = 2;
 
         // スピードレベル
-        _speedLevel = 1;
+        _speedLevel = 8;
 
         // ドクロのタイマーの初期化
         _dokuroTimer = DOKURO_TIME;
@@ -199,6 +201,12 @@ public class Player : MapObject
             case MapController.STATE.BREAKABLE_BLOCK:
                 return;
             case MapController.STATE.BOMB:
+                // すり抜け状態ならボムをすり抜ける
+                if(GetStatus(INVINCIBLE))
+                {
+                    // ボムキックをさせない
+                    break;
+                }
                 // 目的地にボムがあって、キック可能ならキック！
                 if (GetStatus(KICKABLE))
                 {
@@ -209,25 +217,32 @@ public class Player : MapObject
 
         // チップが移動可能なマスなら移動
         Vector3 destinationPosition = MapController.GetChipPosition(destination.x, destination.y);
-        transform.DOMove(destinationPosition, 0.1f).OnComplete(MovedCallback);
+        float time = MOVE_TIME_LEVEL_ONE - MOVE_TIME_INTERVAL * (_speedLevel - 1);
+
+        if(GetStatus(SLOW))
+        {
+            time = MOVE_TIME_LEVEL_ONE / 0.8f;
+        }
+        if (GetStatus(QUICK))
+        {
+            time = MOVE_TIME_LEVEL_ONE * 0.3f;
+        }
+
         SetPosition(destination.x, destination.y, true);
+
+        transform.DOMove(destinationPosition, time).OnComplete(() => {
+            // アニメーションが終了時によばれる
+            // 操作対象を待機状態にする
+            _state = Player.STATE.STAY;
+
+            // 移動したチップにアイテムがあれば取得する
+            Item item = _map.GetItem(_position.x, _position.y);
+            if (item == null) return;
+
+            item.InfluenceEffect(this);
+            item.gameObject.SetActive(false);
+        });
         _state = STATE.MOVE;
-    }
-
-    /// <summary>
-    /// 移動が完了した時に呼ばれるコールバック
-    /// </summary>
-    protected void MovedCallback()
-    {
-        // 操作対象を待機状態にする
-        _state = Player.STATE.STAY;
-
-        // 移動したチップにアイテムがあれば取得する
-        Item item = _map.GetItem(_position.x, _position.y);
-        if (item == null) return;
-
-        item.InfluenceEffect(this);
-        item.gameObject.SetActive(false);
     }
 
     /// <summary>

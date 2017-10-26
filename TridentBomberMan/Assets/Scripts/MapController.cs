@@ -40,6 +40,9 @@ public class MapController : MonoBehaviour
     // アイテムの最大数
     static readonly int ITEM_LIMIT_NUM = 50;
 
+    // 爆発エフェクトの最大数
+    static readonly int EXPLOSION_LIMIT_NUM = 1000;
+
     [SerializeField, Header("破壊不可能ブロックのプレハブ")]
     GameObject _immutableBlockPref;
 
@@ -52,14 +55,18 @@ public class MapController : MonoBehaviour
     [SerializeField]
     GameObject[] _itemPrefab = new GameObject[(int)Item.KIND.KIND_NUM];
 
+    // 爆発エフェクトのプレハブ
+    [SerializeField]
+    Explosion _explosionPrefab;
+
     // シンプルステージのチップ情報
     readonly int[,] SIMPLE_STAGE =
     {
         {1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1},
         {1,0,0,2,2, 2,2,2,2,2, 2,2,0,0,1},
         {1,0,1,2,1, 2,1,2,1,2, 1,2,1,0,1},
-        {1,0,2,2,2, 2,2,2,2,2, 2,2,2,2,1},
-        {1,0,1,2,1, 2,1,2,1,2, 1,2,1,2,1},
+        {1,2,2,2,2, 2,2,2,2,2, 2,2,2,2,1},
+        {1,2,1,2,1, 2,1,2,1,2, 1,2,1,2,1},
 
         {1,2,2,2,2, 2,2,2,2,2, 2,2,2,2,1},
         {1,2,1,2,1, 2,1,2,1,2, 1,2,1,2,1},
@@ -82,16 +89,13 @@ public class MapController : MonoBehaviour
     Item[] _item;
 
     // ボムのインスタンス
-    Bomb[] _bomb;
+    Bomb[] _bomb = new Bomb[BOMB_LIMIT_NUM];
+
+    // 爆発エフェクト
+    Explosion[] _explosion = new Explosion[EXPLOSION_LIMIT_NUM];
 
     [SerializeField]
     BattleManager _battleManager;
-
-
-    private void Awake()
-    {
-        Init();
-    }
 
     /// <summary>
     /// 初期設定
@@ -107,7 +111,6 @@ public class MapController : MonoBehaviour
     /// </summary>
     void CreateObjects()
     {
-        
         List<Block> array = new List<Block>();
 
         // マップのブロックの初期化
@@ -144,7 +147,7 @@ public class MapController : MonoBehaviour
         _item = new Item[n];
         for (int i = 0; i < n; i++)
         {
-            int m = Random.Range(0, (int)Item.KIND.KIND_NUM - 1);
+            int m = Random.Range(0, (int)Item.KIND.KIND_NUM);
             _item[i] = Instantiate(_itemPrefab[m], Vector3.zero, Quaternion.identity, transform).GetComponent<Item>();
             _item[i].SetPosition(array[i].GetPosition().x, array[i].GetPosition().y, false);
             array[i].SetItem(_item[i]);
@@ -153,11 +156,17 @@ public class MapController : MonoBehaviour
         array.Clear();
 
         // ボムの初期化
-        _bomb = new Bomb[BOMB_LIMIT_NUM];
         for (int i = 0; i < BOMB_LIMIT_NUM; i++)
         {
             _bomb[i] = Instantiate<Bomb>(_bombPrefab, Vector3.zero, Quaternion.identity, transform);
             _bomb[i].SetActive(false);
+        }
+
+        // エフェクトの初期化
+        for (int i = 0; i < EXPLOSION_LIMIT_NUM; i++)
+        {
+            _explosion[i] = Instantiate<Explosion>(_explosionPrefab, Vector3.zero, Quaternion.identity, transform);
+            _explosion[i].gameObject.SetActive(false);
         }
     }
 
@@ -179,6 +188,22 @@ public class MapController : MonoBehaviour
                 }
             }
         }
+
+        //for (int i = 0; i < EXPLOSION_LIMIT_NUM; i++)
+        //{
+        //    // 使用中でないなら次のエフェクトをチェック
+        //    if (_explosion[i].gameObject.GetActive() == false)
+        //        continue;
+
+        //    // アニメーションの再生が終了していなければ次へ
+        //    if (_explosion[i].GetCurrentAnimatorStateInfo(0).normalizedTime < 0.999999f)
+        //        continue;
+
+        //    // 使用中でなくする
+        //    _explosion[i].gameObject.SetActive(false);
+
+        //    return;
+        //}
     }
 
 
@@ -261,9 +286,13 @@ public class MapController : MonoBehaviour
                 if (IsOutOfRange(x, y))
                     continue;
 
-                    switch ((STATE)_stage[y, x])
+                
+
+                switch ((STATE)_stage[y, x])
                 {
                     case STATE.NONE:
+                        // 爆発エフェクトの再生
+                        PlayExplosionEffect(x, y);
                         // プレイヤーとの当たり判定
                         for (int k = 0; k < _battleManager._playerNum; k++)
                         {
@@ -297,6 +326,8 @@ public class MapController : MonoBehaviour
                         j = fireLevel + 1;
                         break;
                     case STATE.BOMB:
+                        // 爆発エフェクトの再生
+                        PlayExplosionEffect(x, y);
                         SetChipState(x, y, STATE.NONE);
                         // プレイヤーとの当たり判定
                         for (int k = 0; k < _battleManager._playerNum; k++)
@@ -319,6 +350,27 @@ public class MapController : MonoBehaviour
             }
             SetChipState(bombPosition.x, bombPosition.y, STATE.NONE);
             bomb.SetActive(false);
+        }
+    }
+
+    /// <summary>
+    /// 爆発エフェクトの再生
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    private void PlayExplosionEffect(int x, int y)
+    {
+        for (int i = 0; i < EXPLOSION_LIMIT_NUM; i++)
+        {
+            // 使用中なら次のエフェクトをチェック
+            if (_explosion[i].gameObject.GetActive() == true)
+                continue;
+
+            // 座標の設定
+            _explosion[i].transform.position = GetChipPosition(x, y);
+            _explosion[i].Play();
+
+            return;
         }
     }
 

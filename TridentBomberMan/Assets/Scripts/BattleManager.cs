@@ -34,8 +34,6 @@ public class BattleManager : MonoBehaviour
     [SerializeField]
     private int _humanNum;
 
-
-
     void Awake ()
     {
         DOTween.Init();    // ← コレないと効かない
@@ -50,6 +48,9 @@ public class BattleManager : MonoBehaviour
         _playerNum = 4;
         _humanNum = 1;
 
+        // マップを生成
+        _map.Init();
+
         // プレイヤーのインスタンスを生成
         _playerInstances = new GameObject[_playerNum];
 
@@ -58,8 +59,6 @@ public class BattleManager : MonoBehaviour
 
         // プレイヤーを操作するコントローラを生成
         _controllers = new ControllerBase[_playerNum];
-
-
 
         // インスタンスの生成と配置
         for (int i = 0; i < _playerNum; i++)
