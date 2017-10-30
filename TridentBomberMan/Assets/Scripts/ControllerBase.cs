@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class ControllerBase
 {
+    protected MapController _map;
+
     // 操作する対象
     [SerializeField]
     protected Player _player;
@@ -45,5 +47,14 @@ public class ControllerBase
     public void SetPlayer(Player player)
     {
         _player = player;
+    }
+
+    /// <summary>
+    /// マップを知る
+    /// </summary>
+    /// <param name="map"></param>
+    public void SetMap(MapController map)
+    {
+        _map = map;
     }
 }

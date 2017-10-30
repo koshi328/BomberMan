@@ -86,16 +86,16 @@ public class Player : MapObject
         _state = STATE.STAY;
 
         // ボムの最大所持数
-        _maxBombNum = 8;
+        _maxBombNum = 1;
 
         // ボムの現在の所持数
         _currentBombNum = _maxBombNum;
 
         // 火力レベル
-        _fireLevel = 2;
+        _fireLevel = 1;
 
         // スピードレベル
-        _speedLevel = 8;
+        _speedLevel = 1;
 
         // ドクロのタイマーの初期化
         _dokuroTimer = DOKURO_TIME;

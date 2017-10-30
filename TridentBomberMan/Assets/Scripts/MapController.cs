@@ -10,7 +10,8 @@ public class MapController : MonoBehaviour
         NONE,           // 地面
         IMMUTABLE_BLOCK,// 破壊不可能ブロック
         BREAKABLE_BLOCK,// 破壊可能ブロック
-        BOMB            // 爆弾
+        CAUTION,        // 爆発の危険
+        BOMB,           // 爆弾
     }
 
     // 座標
@@ -234,6 +235,45 @@ public class MapController : MonoBehaviour
             // 使用中にする
             _bomb[i].SetActive(true);
 
+            Vector2[] dir =
+            {
+            new Vector2( 0, 1),
+            new Vector2( 0,-1),
+            new Vector2( 1, 0),
+            new Vector2(-1, 0),
+        };
+
+            // マップ情報の書き換え
+            for (int j = 0; j < dir.Length; j++)
+            {
+                for (int k = 0; k < _bomb[i]._fireLevel + 1; k++)
+                {
+                    MapController.Position bombPosition = _bomb[i].GetPosition();
+
+                    int expX = (int)(bombPosition.x + (dir[j].x * k));
+                    int expY = (int)(bombPosition.y + (dir[j].y * k));
+
+                    if (IsOutOfRange(expX, expY))
+                        continue;
+
+                    switch ((STATE)_stage[expY, expX])
+                    {
+                        case STATE.NONE:
+                            _stage[expY, expX] = (int)STATE.CAUTION;
+                            break;
+                        case STATE.BOMB:
+                            
+                            break;
+                        case STATE.IMMUTABLE_BLOCK:
+                            k = _bomb[i]._fireLevel + 1;
+                            break;
+                        case STATE.BREAKABLE_BLOCK:
+                            k = _bomb[i]._fireLevel + 1;
+                            break;
+                    }
+                }
+            }
+
             return;
         }
     }
@@ -286,11 +326,32 @@ public class MapController : MonoBehaviour
                 if (IsOutOfRange(x, y))
                     continue;
 
-                
-
                 switch ((STATE)_stage[y, x])
                 {
                     case STATE.NONE:
+                        // 爆発エフェクトの再生
+                        PlayExplosionEffect(x, y);
+                        // プレイヤーとの当たり判定
+                        for (int k = 0; k < _battleManager._playerNum; k++)
+                        {
+                            if (_battleManager.GetPlayer(k).GetPosition().x == x && _battleManager.GetPlayer(k).GetPosition().y == y)
+                            {
+                                _battleManager.GetPlayer(k).Death();
+                            }
+                        }
+
+                        // アイテムとの当たり判定
+                        for (int k = 0; k < _item.Length; k++)
+                        {
+                            if (_item[k].gameObject.GetActive() == false) continue;
+
+                            if (_item[k].GetPosition().x == x && _item[k].GetPosition().y == y)
+                            {
+                                _item[k].gameObject.SetActive(false);
+                            }
+                        }
+                        break;
+                    case STATE.CAUTION:
                         // 爆発エフェクトの再生
                         PlayExplosionEffect(x, y);
                         // プレイヤーとの当たり判定
@@ -317,6 +378,8 @@ public class MapController : MonoBehaviour
                         j = fireLevel + 1;
                         break;
                     case STATE.BREAKABLE_BLOCK:
+                        // 爆発エフェクトの再生
+                        PlayExplosionEffect(x, y);
                         SetChipState(x, y, STATE.NONE);
                         // 破壊可能ブロックとの当たり判定
                         if (_block[GetKey(x, y)] != null)

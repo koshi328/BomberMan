@@ -108,6 +108,7 @@ public class BattleManager : MonoBehaviour
             }
 
             _controllers[i].SetPlayer(_playerInfo[i]);
+            _controllers[i].SetMap(_map);
         }
     }
 	

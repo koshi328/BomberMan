@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class Item : MapObject
 {
@@ -29,14 +30,6 @@ public class Item : MapObject
     {
 		
 	}
-
-    /// <summary>
-    /// 生成の時に呼び出してもらう初期化
-    /// </summary>
-    public void Init(KIND kind)
-    {
-
-    }
 
     public void InfluenceEffect(Player player)
     {

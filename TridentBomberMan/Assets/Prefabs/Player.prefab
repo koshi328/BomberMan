@@ -52,6 +52,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e967b5ed662c63c47a6baee5840e1016, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _map: {fileID: 0}
+  _playerNumber: 0
+  _maxBombNum: 0
+  _currentBombNum: 0
+  _fireLevel: 0
+  _speedLevel: 0
 --- !u!212 &212561696690408050
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -81,8 +87,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1283803773
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: a002ffd3b3278e44abe859fe2736d032, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
