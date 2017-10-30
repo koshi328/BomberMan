@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class MapController : MonoBehaviour
 {
@@ -41,6 +42,9 @@ public class MapController : MonoBehaviour
     // アイテムの最大数
     static readonly int ITEM_LIMIT_NUM = 50;
 
+    // アイテムの入ってる率
+    static readonly float ITEM_RATE = 0.7f;
+
     // 爆発エフェクトの最大数
     static readonly int EXPLOSION_LIMIT_NUM = 1000;
 
@@ -59,6 +63,10 @@ public class MapController : MonoBehaviour
     // 爆発エフェクトのプレハブ
     [SerializeField]
     Explosion _explosionPrefab;
+
+    // メインカメラ
+    [SerializeField]
+    Camera _camera;
 
     // シンプルステージのチップ情報
     readonly int[,] SIMPLE_STAGE =
@@ -144,7 +152,7 @@ public class MapController : MonoBehaviour
             array[i] = array[elem];
             array[elem] = temp;
         }
-        int n = (int)(array.Count * 0.7f);
+        int n = (int)(array.Count * ITEM_RATE);
         _item = new Item[n];
         for (int i = 0; i < n; i++)
         {
@@ -306,8 +314,14 @@ public class MapController : MonoBehaviour
         // ボムの所持数を回復
         _battleManager.GetPlayer(bomb._playerNumber)._currentBombNum++;
 
+        // ボムの座標を取得
         MapController.Position bombPosition = bomb.GetPosition();
         int fireLevel = bomb._fireLevel;
+
+        // 火力が一定以上なら画面を揺らす
+        //if(fireLevel)
+        _camera.transform.DOShakePosition(0.1f);
+
         Vector2[] dir =
         {
             new Vector2( 0, 1),

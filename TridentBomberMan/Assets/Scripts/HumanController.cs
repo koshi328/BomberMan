@@ -20,9 +20,13 @@ public class HumanController : ControllerBase
 
         Vector2 direction = Vector2.zero;
 
+        // 取得するキー情報のタグ
+        var horizontal = "Horizontal" + (_player._playerNumber + 1).ToString() +  "P";
+        var vertical = "Vertical" + (_player._playerNumber + 1).ToString() + "P";
+
         // 入力を取得
-        float xInput = Input.GetAxisRaw("Horizontal");
-        float yInput = Input.GetAxisRaw("Vertical");
+        float xInput = Input.GetAxisRaw(horizontal);
+        float yInput = Input.GetAxisRaw(vertical);
 
         // 縦方向の移動の入力がされていたら
         if (float.Epsilon < Mathf.Abs(yInput))
@@ -84,8 +88,10 @@ public class HumanController : ControllerBase
     {
         base.ControlSetBomb();
 
+        var buttonName = "SetBomb" + (_player._playerNumber + 1).ToString() + "P";
+
         // ボタンが押されていたら
-        if (Input.GetButtonDown("SetBomb"))
+        if (Input.GetButtonDown(buttonName))
         {
             _player.SetBomb();
         }
