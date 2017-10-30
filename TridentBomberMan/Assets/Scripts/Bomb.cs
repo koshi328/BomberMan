@@ -19,6 +19,7 @@ public class Bomb : MapObject
 
     private MapController _map;
     private BattleManager _battleManager;
+    private Animator _myAnimator;
 
     /// <summary>
     /// 初期化
@@ -27,6 +28,7 @@ public class Bomb : MapObject
     {
         // 爆発までの時間
         _currentElapsedTime = LIMIT_TIME;
+        _myAnimator = GetComponent<Animator>();
     }
 
     /// <summary>
@@ -54,6 +56,11 @@ public class Bomb : MapObject
     {
         // 爆発までのカウントダウン
         _currentElapsedTime -= Time.deltaTime;
+
+        if(_currentElapsedTime <= 1.0f)
+        {
+            _myAnimator.SetBool("Verge", true);
+        }
     }
 
     /// <summary>
