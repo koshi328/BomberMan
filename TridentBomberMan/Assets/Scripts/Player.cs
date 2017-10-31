@@ -74,8 +74,8 @@ public class Player : MapObject
     public static readonly int ISALIVE = 0x20;
     public static readonly int ISSTAN = 0x40;
 
-    public static readonly float MOVE_TIME_LEVEL_ONE = 0.5f;
-    public static readonly float MOVE_TIME_INTERVAL = 0.05f;
+    public static readonly float MOVE_TIME_LEVEL_ONE = 0.4f;
+    public static readonly float MOVE_TIME_INTERVAL = 0.04f;
 
     void Start()
     {
@@ -228,12 +228,12 @@ public class Player : MapObject
             time = MOVE_TIME_LEVEL_ONE * 0.3f;
         }
 
-        SetPosition(destination.x, destination.y, true);
-
         transform.DOMove(destinationPosition, time).OnComplete(() => {
             // アニメーションが終了時によばれる
             // 操作対象を待機状態にする
             _state = Player.STATE.STAY;
+
+            SetPosition(destination.x, destination.y, true);
 
             // 移動したチップにアイテムがあれば取得する
             Item item = _map.GetItem(_position.x, _position.y);
@@ -241,6 +241,7 @@ public class Player : MapObject
 
             item.InfluenceEffect(this);
             item.gameObject.SetActive(false);
+
         });
         _state = STATE.MOVE;
     }
@@ -252,6 +253,12 @@ public class Player : MapObject
     {
         // ボムが残っていなければおけない
         if (_currentBombNum < 1)
+        {
+            return;
+        }
+
+        // ボムが置いてあるところにはおけない
+        if(_map.GetChipState(_position.x, _position.y) == MapController.STATE.BOMB)
         {
             return;
         }

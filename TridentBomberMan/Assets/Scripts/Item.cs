@@ -28,8 +28,8 @@ public class Item : MapObject
     /// </summary>
 	void Start ()
     {
-
-	}
+        transform.DOLocalPath(new Vector3[] { new Vector3(transform.position.x, transform.position.y + 0.1f), new Vector3(transform.position.x, transform.position.y) }, 1.0f, PathType.CatmullRom).SetLoops(-1);
+    }
 
     public void InfluenceEffect(Player player)
     {
