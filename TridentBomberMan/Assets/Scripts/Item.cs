@@ -28,7 +28,7 @@ public class Item : MapObject
     /// </summary>
 	void Start ()
     {
-		
+
 	}
 
     public void InfluenceEffect(Player player)
