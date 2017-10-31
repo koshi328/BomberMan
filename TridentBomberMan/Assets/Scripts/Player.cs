@@ -77,6 +77,23 @@ public class Player : MapObject
     public static readonly float MOVE_TIME_LEVEL_ONE = 0.4f;
     public static readonly float MOVE_TIME_INTERVAL = 0.04f;
 
+    /// <summary>
+    /// 移動のコルーチン
+    /// </summary>
+    private class MoveCoroutineValue
+    {
+        public int _destinationX;
+        public int _destinationY;
+        public float _waitTime;
+
+        public MoveCoroutineValue(int x, int y, float waitTime)
+        {
+            _destinationX = x;
+            _destinationY = y;
+            _waitTime = waitTime;
+        }
+    };
+
     void Start()
     {
         // 生存フラグを立てる
@@ -219,7 +236,7 @@ public class Player : MapObject
         Vector3 destinationPosition = MapController.GetChipPosition(destination.x, destination.y);
         float time = MOVE_TIME_LEVEL_ONE - MOVE_TIME_INTERVAL * (_speedLevel - 1);
 
-        if(GetStatus(SLOW))
+        if (GetStatus(SLOW))
         {
             time = MOVE_TIME_LEVEL_ONE / 0.8f;
         }
@@ -228,22 +245,35 @@ public class Player : MapObject
             time = MOVE_TIME_LEVEL_ONE * 0.3f;
         }
 
+        // コルーチン
+        var value = new MoveCoroutineValue(destination.x, destination.y, time * 0.5f);
+        StartCoroutine("MoveCoroutine", value);
+
         transform.DOMove(destinationPosition, time).OnComplete(() => {
             // アニメーションが終了時によばれる
             // 操作対象を待機状態にする
             _state = Player.STATE.STAY;
-
-            SetPosition(destination.x, destination.y, true);
-
-            // 移動したチップにアイテムがあれば取得する
-            Item item = _map.GetItem(_position.x, _position.y);
-            if (item == null) return;
-
-            item.InfluenceEffect(this);
-            item.gameObject.SetActive(false);
-
         });
         _state = STATE.MOVE;
+    }
+
+    /// <summary>
+    /// 移動のコルーチン
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator MoveCoroutine(MoveCoroutineValue value)
+    {
+        // 移動時間の半分を待って
+        yield return new WaitForSeconds(value._waitTime);
+
+        SetPosition(value._destinationX, value._destinationY, true);
+
+        // 移動したチップにアイテムがあれば取得する
+        Item item = _map.GetItem(_position.x, _position.y);
+        if (item == null) yield break;
+
+        item.InfluenceEffect(this);
+        item.gameObject.SetActive(false);
     }
 
     /// <summary>

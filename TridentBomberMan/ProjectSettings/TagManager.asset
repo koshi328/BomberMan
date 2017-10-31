@@ -44,8 +44,14 @@ TagManager:
   - name: Item
     uniqueID: 3620295555
     locked: 0
+  - name: Bomb
+    uniqueID: 162814161
+    locked: 0
   - name: Player
     uniqueID: 1283803773
+    locked: 0
+  - name: Explosion
+    uniqueID: 1307609703
     locked: 0
   - name: Block
     uniqueID: 413390561

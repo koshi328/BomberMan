@@ -22,55 +22,7 @@ public class AutomaticController : ControllerBase
         base.ControlMove();
 
         Vector2 direction = Vector2.zero;
-
-        // 今の座標の情報を取得する
-        MapController.STATE state = _map.GetChipState(_player.GetPosition().x, _player.GetPosition().y);
-
-        switch(state)
-        {
-            case MapController.STATE.NONE:
-                break;
-            case MapController.STATE.CAUTION:
-                if (_map.GetChipState(_player.GetPosition().x - 1, _player.GetPosition().y) == MapController.STATE.NONE)
-                {
-                    direction = Vector2.left;
-                }
-                else if (_map.GetChipState(_player.GetPosition().x + 1, _player.GetPosition().y) == MapController.STATE.NONE)
-                {
-                    direction = Vector2.right;
-                }
-                else if (_map.GetChipState(_player.GetPosition().x, _player.GetPosition().y - 1) == MapController.STATE.NONE)
-                {
-                    direction = Vector2.down;
-                }
-                else if (_map.GetChipState(_player.GetPosition().x, _player.GetPosition().y + 1) == MapController.STATE.NONE)
-                {
-                    direction = Vector2.up;
-                }
-                // 移動処理
-                _player.Move(direction);
-                break;
-            case MapController.STATE.BOMB:
-                if (_map.GetChipState(_player.GetPosition().x - 1, _player.GetPosition().y) == MapController.STATE.NONE)
-                {
-                    direction = Vector2.left;
-                }
-                else if (_map.GetChipState(_player.GetPosition().x + 1, _player.GetPosition().y) == MapController.STATE.NONE)
-                {
-                    direction = Vector2.right;
-                }
-                else if (_map.GetChipState(_player.GetPosition().x, _player.GetPosition().y - 1) == MapController.STATE.NONE)
-                {
-                    direction = Vector2.down;
-                }
-                else if (_map.GetChipState(_player.GetPosition().x, _player.GetPosition().y + 1) == MapController.STATE.NONE)
-                {
-                    direction = Vector2.up;
-                }
-                // 移動処理
-                _player.Move(direction);
-                break;
-        }
+        
     }
 
     /// <summary>
