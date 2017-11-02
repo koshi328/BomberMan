@@ -21,7 +21,7 @@ public class HumanController : ControllerBase
         Vector2 direction = Vector2.zero;
 
         // 取得するキー情報のタグ
-        var horizontal = "Horizontal" + (_player._playerNumber + 1).ToString() +  "P";
+        var horizontal = "Horizontal" + (_player._playerNumber + 1).ToString() + "P";
         var vertical = "Vertical" + (_player._playerNumber + 1).ToString() + "P";
 
         // 入力を取得
@@ -78,7 +78,14 @@ public class HumanController : ControllerBase
         //}
 
         // 移動処理
-        _player.Move(direction);
+        if (!_player.GetStatus(Player.ISMISOBON))
+        {
+            _player.Move(direction);
+        }
+        else
+        {
+            _player.MoveMisobon(direction);
+        }
     }
 
     /// <summary>
@@ -93,7 +100,14 @@ public class HumanController : ControllerBase
         // ボタンが押されていたら
         if (Input.GetButtonDown(buttonName))
         {
-            _player.SetBomb();
+            if (!_player.GetStatus(Player.ISMISOBON))
+            {
+                _player.SetBomb();
+            }
+            else
+            {
+                _player.SetBombMisobon();
+            }
         }
     }
 }

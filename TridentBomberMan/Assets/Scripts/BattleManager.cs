@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.UI;
 
 public class BattleManager : MonoBehaviour
 {
@@ -34,6 +35,19 @@ public class BattleManager : MonoBehaviour
     [SerializeField]
     private int _humanNum;
 
+    // 対戦が終了しているか？
+    public bool _isFinished = false;
+    
+    // 残り時間
+    [SerializeField]
+    private float _time;
+
+    [SerializeField]
+    private Text _timeText;
+
+    [SerializeField]
+    private GameObject _finishSprite;
+
     void Awake ()
     {
         DOTween.Init();    // ← コレないと効かない
@@ -59,6 +73,16 @@ public class BattleManager : MonoBehaviour
 
         // プレイヤーを操作するコントローラを生成
         _controllers = new ControllerBase[_playerNum];
+
+        _isFinished = false;
+
+        // 制限時間の表示の配置
+        _timeText.transform.position = new Vector2(100.0f, 100.0f);
+
+        // 終了を知らせる画像
+        _finishSprite.transform.position = Vector3.zero;
+        _finishSprite.transform.localScale = Vector3.zero;
+        _finishSprite.gameObject.SetActive(false);
 
         // インスタンスの生成と配置
         for (int i = 0; i < _playerNum; i++)
@@ -114,11 +138,32 @@ public class BattleManager : MonoBehaviour
 	
 	void Update ()
     {
+        // 制限時間の更新
+        if (!_isFinished)
+        {
+            _time -= Time.deltaTime;
+            int time = (int)_time;
+            _timeText.text = time.ToString();
+
+            if (_time < 0.0f)
+            {
+                _time = 0.0f;
+                _finishSprite.gameObject.SetActive(true);
+                _finishSprite.transform.DOScale(2.0f, 2.0f).SetEase(Ease.OutBounce);
+                _isFinished = true;
+            }
+        }
+
+        // マップ情報の更新
         _map.MyUpdate();
 
-        for (int i = 0; i < _playerNum; i++)
+        // 対戦中のみプレイヤーの操作を受け付ける
+        if (!_isFinished)
         {
-            _controllers[i].MyUpdate();
+            for (int i = 0; i < _playerNum; i++)
+            {
+                _controllers[i].MyUpdate();
+            }
         }
     }
 

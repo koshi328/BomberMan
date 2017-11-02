@@ -196,22 +196,6 @@ public class MapController : MonoBehaviour
                 }
             }
         }
-
-        //for (int i = 0; i < EXPLOSION_LIMIT_NUM; i++)
-        //{
-        //    // 使用中でないなら次のエフェクトをチェック
-        //    if (_explosion[i].gameObject.GetActive() == false)
-        //        continue;
-
-        //    // アニメーションの再生が終了していなければ次へ
-        //    if (_explosion[i].GetCurrentAnimatorStateInfo(0).normalizedTime < 0.999999f)
-        //        continue;
-
-        //    // 使用中でなくする
-        //    _explosion[i].gameObject.SetActive(false);
-
-        //    return;
-        //}
     }
 
 
@@ -241,45 +225,6 @@ public class MapController : MonoBehaviour
 
             // 使用中にする
             _bomb[i].SetActive(true);
-
-        //    Vector2[] dir =
-        //    {
-        //    new Vector2( 0, 1),
-        //    new Vector2( 0,-1),
-        //    new Vector2( 1, 0),
-        //    new Vector2(-1, 0),
-        //};
-
-        //    // マップ情報の書き換え
-        //    for (int j = 0; j < dir.Length; j++)
-        //    {
-        //        for (int k = 0; k < _bomb[i]._fireLevel + 1; k++)
-        //        {
-        //            MapController.Position bombPosition = _bomb[i].GetPosition();
-
-        //            int expX = (int)(bombPosition.x + (dir[j].x * k));
-        //            int expY = (int)(bombPosition.y + (dir[j].y * k));
-
-        //            if (IsOutOfRange(expX, expY))
-        //                continue;
-
-        //            switch ((STATE)_stage[expY, expX])
-        //            {
-        //                case STATE.NONE:
-        //                    SetChipState(expX, expY, STATE.CAUTION);
-        //                    break;
-        //                case STATE.BOMB:
-                            
-        //                    break;
-        //                case STATE.IMMUTABLE_BLOCK:
-        //                    k = _bomb[i]._fireLevel + 1;
-        //                    break;
-        //                case STATE.BREAKABLE_BLOCK:
-        //                    k = _bomb[i]._fireLevel + 1;
-        //                    break;
-        //            }
-        //        }
-        //    }
 
             return;
         }
@@ -345,12 +290,16 @@ public class MapController : MonoBehaviour
                     case STATE.NONE:
                         // 爆発エフェクトの再生
                         PlayExplosionEffect(x, y);
+
                         // プレイヤーとの当たり判定
-                        for (int k = 0; k < _battleManager._playerNum; k++)
+                        if (!_battleManager._isFinished)
                         {
-                            if (_battleManager.GetPlayer(k).GetPosition().x == x && _battleManager.GetPlayer(k).GetPosition().y == y)
+                            for (int k = 0; k < _battleManager._playerNum; k++)
                             {
-                                _battleManager.GetPlayer(k).Death();
+                                if (_battleManager.GetPlayer(k).GetPosition().x == x && _battleManager.GetPlayer(k).GetPosition().y == y)
+                                {
+                                    _battleManager.GetPlayer(k).Death();
+                                }
                             }
                         }
 
@@ -384,11 +333,14 @@ public class MapController : MonoBehaviour
                         PlayExplosionEffect(x, y);
                         SetChipState(x, y, STATE.NONE);
                         // プレイヤーとの当たり判定
-                        for (int k = 0; k < _battleManager._playerNum; k++)
+                        if (!_battleManager._isFinished)
                         {
-                            if (_battleManager.GetPlayer(k).GetPosition().x == x && _battleManager.GetPlayer(k).GetPosition().y == y)
+                            for (int k = 0; k < _battleManager._playerNum; k++)
                             {
-                                _battleManager.GetPlayer(k).Death();
+                                if (_battleManager.GetPlayer(k).GetPosition().x == x && _battleManager.GetPlayer(k).GetPosition().y == y)
+                                {
+                                    _battleManager.GetPlayer(k).Death();
+                                }
                             }
                         }
                         // 他の爆弾との当たり判定
@@ -475,6 +427,7 @@ public class MapController : MonoBehaviour
     /// <returns></returns>
     public MapController.STATE GetChipState(int x, int y)
     {
+        if (IsOutOfRange(x, y)) return STATE.IMMUTABLE_BLOCK;
         return (STATE)_stage[y, x];
     }
 
@@ -499,10 +452,10 @@ public class MapController : MonoBehaviour
     /// <returns></returns>
     static public Vector3 GetChipPosition(int x, int y)
     {
-        if (x < 1) return Vector3.zero;
-        if (WIDTH - 1 < x) return Vector3.zero;
-        if (y < 1) return Vector3.zero;
-        if (HEIGHT - 1 < y) return Vector3.zero;
+        //if (x < 0) return Vector3.zero;
+        //if (WIDTH - 1 < x) return Vector3.zero;
+        //if (y < 0) return Vector3.zero;
+        //if (HEIGHT - 1 < y) return Vector3.zero;
 
         Vector3 pos = Vector3.zero;
         pos.x = -(WIDTH - 1) * CHIP_SIZE / 2 + x * CHIP_SIZE;
