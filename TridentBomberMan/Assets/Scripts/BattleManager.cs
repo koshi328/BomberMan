@@ -152,6 +152,24 @@ public class BattleManager : MonoBehaviour
                 _finishSprite.transform.DOScale(2.0f, 2.0f).SetEase(Ease.OutBounce);
                 _isFinished = true;
             }
+
+            int alivePlayerNum = 0;
+
+            // プレイヤーが1人以下なら
+            for(int i = 0;i< _playerNum;i++)
+            {
+                if(_playerInfo[i].GetStatus(Player.ISALIVE))
+                {
+                    alivePlayerNum++;
+                }
+            }
+
+            if(alivePlayerNum <= 1)
+            {
+                _finishSprite.gameObject.SetActive(true);
+                _finishSprite.transform.DOScale(2.0f, 2.0f).SetEase(Ease.OutBounce);
+                _isFinished = true;
+            }
         }
 
         // マップ情報の更新

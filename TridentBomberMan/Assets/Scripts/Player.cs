@@ -101,7 +101,7 @@ public class Player : MapObject
     void Start()
     {
         // 生存フラグを立てる
-        _flag |= ISALIVE;
+        SetStatus(ISALIVE, true);
 
         // 待機状態にする
         _state = STATE.STAY;
@@ -268,59 +268,6 @@ public class Player : MapObject
     }
 
     /// <summary>
-    /// ミソボンの移動
-    /// </summary>
-    /// <param name="direction"></param>
-    public void MoveMisobon(Vector2 direction)
-    {
-        // 現在地を取得
-        MapController.Position currentPosition = GetPosition();
-        MapController.Position destination = new MapController.Position(currentPosition.x, currentPosition.y);
-
-        // 向いてる方向を更新
-        _currentDirection = direction;
-
-        // チップの情報を保存するための変数とりあえず破壊不可能ブロック
-        MapController.STATE state = MapController.STATE.IMMUTABLE_BLOCK;
-
-        // 目的地を計算
-        destination.x += (int)(direction.x);
-        destination.y += (int)(direction.y);
-
-        // 目的地のチップ情報を取得する
-        state = _map.GetChipState(destination.x, destination.y);
-
-        // 移動可能なマスの場合はbreak、不可能なら以下を処理しない為にreturn
-        switch (state)
-        {
-            case MapController.STATE.NONE:
-                return;
-            case MapController.STATE.IMMUTABLE_BLOCK:
-                break;
-            case MapController.STATE.BREAKABLE_BLOCK:
-                return;
-            case MapController.STATE.BOMB:
-                return;
-        }
-
-        // チップが移動可能なマスなら移動
-        Vector3 destinationPosition = MapController.GetChipPosition(destination.x, destination.y);
-        float time = MOVE_TIME_LEVEL_ONE - MOVE_TIME_INTERVAL * (_speedLevel - 1);
-        
-
-        // コルーチン
-        var value = new MoveCoroutineValue(destination.x, destination.y, time * 0.5f);
-        StartCoroutine("MoveCoroutine", value);
-
-        transform.DOMove(destinationPosition, time).OnComplete(() => {
-            // アニメーションが終了時によばれる
-            // 操作対象を待機状態にする
-            _state = Player.STATE.STAY;
-        });
-        _state = STATE.MOVE;
-    }
-
-    /// <summary>
     /// 移動のコルーチン
     /// </summary>
     /// <returns></returns>
@@ -361,21 +308,6 @@ public class Player : MapObject
     }
 
     /// <summary>
-    /// ミソボンがボムを置く
-    /// </summary>
-    public void SetBombMisobon()
-    {
-        // ボムが残っていなければおけない
-        if (_currentBombNum < 1)
-        {
-            return;
-        }
-
-        _currentBombNum--;
-        _map.SetBomb(_playerNumber, GetPosition().x + (int)_currentDirection.x * 3, GetPosition().y + (int)_currentDirection.y * 3, _fireLevel);
-    }
-
-    /// <summary>
     /// マップを知る
     /// </summary>
     public void SetMap(MapController map)
@@ -388,16 +320,16 @@ public class Player : MapObject
     /// </summary>
     public void Death()
     {
-        // 消す
-        //gameObject.SetActive(false);
-
-        SetPosition(0, 0, false);
+        //SetPosition(0, 0, false);
 
         // 生存フラグを折る
         SetStatus(ISALIVE, false);
 
         // ミソボンになる
-        SetStatus(ISMISOBON, true);
+        //SetStatus(ISMISOBON, true);
+
+        // 消す
+        gameObject.SetActive(false);
     }
 
     /// <summary>

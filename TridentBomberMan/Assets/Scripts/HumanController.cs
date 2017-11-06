@@ -56,35 +56,10 @@ public class HumanController : ControllerBase
             return;
         }
 
-        //if(Input.GetKeyDown(KeyCode.LeftArrow))
-        //{
-        //    direction = Player.DIRECTION.LEFT;
-        //}
-        //else if(Input.GetKeyDown(KeyCode.RightArrow))
-        //{
-        //    direction = Player.DIRECTION.RIGHT;
-        //}
-        //else if(Input.GetKeyDown(KeyCode.UpArrow))
-        //{
-        //    direction = Player.DIRECTION.UP;
-        //}
-        //else if(Input.GetKeyDown(KeyCode.DownArrow))
-        //{
-        //    direction = Player.DIRECTION.DOWN;
-        //}
-        //else
-        //{
-        //    return;
-        //}
-
         // 移動処理
         if (!_player.GetStatus(Player.ISMISOBON))
         {
             _player.Move(direction);
-        }
-        else
-        {
-            _player.MoveMisobon(direction);
         }
     }
 
@@ -103,10 +78,6 @@ public class HumanController : ControllerBase
             if (!_player.GetStatus(Player.ISMISOBON))
             {
                 _player.SetBomb();
-            }
-            else
-            {
-                _player.SetBombMisobon();
             }
         }
     }

@@ -17,7 +17,7 @@ public class ControllerBase
 	
 	public virtual void MyUpdate()
     {
-        //if (_player.GetStatus(Player.ISALIVE) == false) return;
+        if (_player.GetStatus(Player.ISALIVE) == false) return;
 
         _player.MyUpdate();
         ControlMove();
