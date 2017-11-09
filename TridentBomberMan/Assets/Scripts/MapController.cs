@@ -27,10 +27,10 @@ public class MapController : MonoBehaviour
     }
 
     // 幅
-    static readonly int WIDTH = 15;
+    public static readonly int WIDTH = 15;
 
     // 高さ
-    static readonly int HEIGHT = 13;
+    public static readonly int HEIGHT = 13;
 
     // チップサイズ
     static readonly float CHIP_SIZE = 1.28f;
@@ -155,10 +155,44 @@ public class MapController : MonoBehaviour
         _item = new Item[n];
         for (int i = 0; i < n; i++)
         {
-            int m = Random.Range(0, (int)Item.KIND.KIND_NUM);
-            _item[i] = Instantiate(_itemPrefab[m], Vector3.zero, Quaternion.identity, transform).GetComponent<Item>();
+            int m = Random.Range(0, 1000);
+
+            if(0 <= m && m < 300)
+            {
+                _item[i] = Instantiate(_itemPrefab[(int)Item.KIND.BOMB_UP], Vector3.zero, Quaternion.identity, transform).GetComponent<Item>();
+            }
+            if (300 <= m && m < 600)
+            {
+                _item[i] = Instantiate(_itemPrefab[(int)Item.KIND.FIRE_UP], Vector3.zero, Quaternion.identity, transform).GetComponent<Item>();
+            }
+            if (600 <= m && m < 900)
+            {
+                _item[i] = Instantiate(_itemPrefab[(int)Item.KIND.SPEED_UP], Vector3.zero, Quaternion.identity, transform).GetComponent<Item>();
+            }
+            if (900 <= m && m < 925)
+            {
+                _item[i] = Instantiate(_itemPrefab[(int)Item.KIND.FIRE_FULL], Vector3.zero, Quaternion.identity, transform).GetComponent<Item>();
+            }
+            if (925 <= m && m < 950)
+            {
+                _item[i] = Instantiate(_itemPrefab[(int)Item.KIND.DOKURO], Vector3.zero, Quaternion.identity, transform).GetComponent<Item>();
+            }
+            if (950 <= m && m < 975)
+            {
+                _item[i] = Instantiate(_itemPrefab[(int)Item.KIND.BOMB_KICK], Vector3.zero, Quaternion.identity, transform).GetComponent<Item>();
+            }
+            if (975 <= m)
+            {
+                _item[i] = Instantiate(_itemPrefab[(int)Item.KIND.INVINCIBLE], Vector3.zero, Quaternion.identity, transform).GetComponent<Item>();
+            }
+
             _item[i].SetPosition(array[i].GetPosition().x, array[i].GetPosition().y, false);
             array[i].SetItem(_item[i]);
+
+            //int m = Random.Range(0, (int)Item.KIND.KIND_NUM);
+            //_item[i] = Instantiate(_itemPrefab[m], Vector3.zero, Quaternion.identity, transform).GetComponent<Item>();
+            //_item[i].SetPosition(array[i].GetPosition().x, array[i].GetPosition().y, false);
+            //array[i].SetItem(_item[i]);
         }
 
         array.Clear();

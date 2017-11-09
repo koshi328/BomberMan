@@ -104,6 +104,7 @@ public class Bomb : MapObject
                 player.GetPosition().y == destination.y)
             {
                 player.SetStatus(Player.ISSTAN, true);
+                return;
             }
         }
 
