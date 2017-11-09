@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class HumanController : ControllerBase
 {
-	void Start ()
+	public override void Initialize ()
     {
 	}
 

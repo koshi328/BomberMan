@@ -9,6 +9,7 @@ public class BattleManager : MonoBehaviour
     // マップ
     [SerializeField]
     private MapController _map;
+    MapNavigation _mapNavigation;
 
     // プレイヤーコントローラ
     private ControllerBase[] _controllers;
@@ -60,7 +61,7 @@ public class BattleManager : MonoBehaviour
     {
         // 設定シーンで設定した値を入れられるように後でする予定
         _playerNum = 4;
-        _humanNum = 2;
+        _humanNum = 0;
 
         // マップを生成
         _map.Init();
@@ -133,7 +134,10 @@ public class BattleManager : MonoBehaviour
 
             _controllers[i].SetPlayer(_playerInfo[i]);
             _controllers[i].SetMap(_map);
+            _controllers[i].Initialize();
         }
+
+        _mapNavigation = GameObject.Find("MapNavigation").GetComponent<MapNavigation>();
     }
 	
 	void Update ()
@@ -175,6 +179,7 @@ public class BattleManager : MonoBehaviour
         // マップ情報の更新
         _map.MyUpdate();
 
+        _mapNavigation.MyUpdate();
         // 対戦中のみプレイヤーの操作を受け付ける
         if (!_isFinished)
         {

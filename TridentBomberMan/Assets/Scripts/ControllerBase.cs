@@ -10,7 +10,7 @@ public class ControllerBase
     [SerializeField]
     protected Player _player;
 
-	void Start()
+	public virtual void Initialize()
     {
 
 	}

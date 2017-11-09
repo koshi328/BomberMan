@@ -502,4 +502,21 @@ public class MapController : MonoBehaviour
     {
         return x * 100 + y;
     }
+
+    public int GetWidth()
+    {
+        return WIDTH;
+    }
+    public int GetHeight()
+    {
+        return HEIGHT;
+    }
+    public Bomb[] GetBomb()
+    {
+        return _bomb;
+    }
+    public Item[] GetItems()
+    {
+        return _item;
+    }
 }
