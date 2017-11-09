@@ -11,6 +11,9 @@ public class MapNavigation : MonoBehaviour
     float[,] field;
     int width;
     int height;
+    [SerializeField]
+    GameObject debugPrefab;
+    GameObject[,] debugs;
     // Use this for initialization
     void Start()
     {
@@ -20,6 +23,16 @@ public class MapNavigation : MonoBehaviour
         bombInfluenceMap = new float[width, height];
         setbombInfluenceMap = new float[width, height];
         field = new float[width, height];
+        debugs = new GameObject[width, height];
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                debugs[i, j] = Instantiate(debugPrefab);
+                debugs[i, j].transform.parent = this.transform;
+                debugs[i, j].transform.localPosition = new Vector3(i * 0.32f, j * 0.32f, 0);
+            }
+        }
     }
 
     public void MyUpdate()
@@ -38,7 +51,18 @@ public class MapNavigation : MonoBehaviour
         CulcSetbombInfluence();
         CulcItemScore();
 
-        if(Input.GetKeyDown(KeyCode.E))
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                if (IsCloseChip(i, j))
+                {
+                    bombInfluenceMap[i, j] = 1.0f;
+                }
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.E))
             Dump();
     }
 
@@ -64,7 +88,7 @@ public class MapNavigation : MonoBehaviour
                 {
                     continue;
                 }
-                if (CanSafetyBombPut(i, j, i, j))
+                if (CheckWall(i, j) && CanSafetyBombPut(i, j, i, j))
                 {
                     setbombInfluenceMap[i, j] = 1.0f;
                     BombRouteCulc(i, j);
@@ -90,17 +114,15 @@ public class MapNavigation : MonoBehaviour
                 {
                     continue;
                 }
-                int range = Mathf.Abs(i - x) + Mathf.Abs(j - y);
-                if (range != 0)
-                {
-                    range = 1 - (range / (width + height));
-                    if (setbombInfluenceMap[i, j] < range) continue;
-                    setbombInfluenceMap[i, j] = range;
-                }
-                else
+                if (x == i && y == j)
                 {
                     setbombInfluenceMap[i, j] = 1.0f;
+                    continue;
                 }
+                float range = Mathf.Abs(i - x) + Mathf.Abs(j - y);
+                range = 1 - (range / (width + height)) * 2;
+                if (setbombInfluenceMap[i, j] > range) continue;
+                setbombInfluenceMap[i, j] = range;
             }
         }
     }
@@ -145,10 +167,10 @@ public class MapNavigation : MonoBehaviour
         {
             return true;
         }
-        if (dir != 1 && CanSafetyBombPut(bx, by, x + 1, y, 2)) { field[x, y] -= 0.2f; return true; }
-        if (dir != 2 && CanSafetyBombPut(bx, by, x - 1, y, 1)) { field[x, y] -= 0.2f; return true; }
-        if (dir != 3 && CanSafetyBombPut(bx, by, x, y + 1, 4)) { field[x, y] -= 0.2f; return true; }
-        if (dir != 4 && CanSafetyBombPut(bx, by, x, y - 1, 3)) { field[x, y] -= 0.2f; return true; }
+        if (dir != 1 && CanSafetyBombPut(bx, by, x + 1, y, 2)) { field[x, y] -= 0.5f; return true; }
+        if (dir != 2 && CanSafetyBombPut(bx, by, x - 1, y, 1)) { field[x, y] -= 0.5f; return true; }
+        if (dir != 3 && CanSafetyBombPut(bx, by, x, y + 1, 4)) { field[x, y] -= 0.5f; return true; }
+        if (dir != 4 && CanSafetyBombPut(bx, by, x, y - 1, 3)) { field[x, y] -= 0.5f; return true; }
 
         return false;
     }
@@ -163,6 +185,7 @@ public class MapNavigation : MonoBehaviour
             int x = item.GetPosition().x;
             int y = item.GetPosition().y;
             field[x, y] -= 0.3f;
+            //if (field[x, y] <= 0.0f) field[x, y] = 0.0f;
         }
     }
 
@@ -175,17 +198,25 @@ public class MapNavigation : MonoBehaviour
             {
                 s += GetScore(j, i) + ",";
                 //s += setbombInfluenceMap[j,i] + ",";
+                float c = setbombInfluenceMap[j, i];
+                c = GetScore(j,i);
+                //c = bombInfluenceMap[j, i]; ;
+                if (c <= 0.0f)
+                    debugs[j, i].GetComponent<SpriteRenderer>().color = new Color(1, 0, 0, 1.0f);
+                else
+                    debugs[j, i].GetComponent<SpriteRenderer>().color = new Color(c, c, c, 1.0f);
             }
-            Debug.Log(s);
+            //Debug.Log(s);
         }
     }
 
     public float GetScore(int x,int y)
     {
+        if (_mapController.GetChipState(x, y) != MapController.STATE.NONE) return 1.0f;
         float score = 0.0f;
         score += setbombInfluenceMap[x, y] * 0.3f;
-        score += bombInfluenceMap[x, y] * 0.5f;
-        score += field[x, y] * 0.2f;
+        score += bombInfluenceMap[x, y] * 0.6f;
+        score += field[x, y] * 0.1f;
         return score;
     }
     public float GetCanSafetyBombPut(int x,int y)
@@ -215,5 +246,25 @@ public class MapNavigation : MonoBehaviour
             }
         }
         return false;
+    }
+    public bool IsCloseChip(int x, int y)
+    {
+        Vector2[] dir =
+{
+            new Vector2( 0, 1),
+            new Vector2( 0,-1),
+            new Vector2( 1, 0),
+            new Vector2(-1, 0)
+        };
+        for (int i = 0; i < dir.Length; i++)
+        {
+            int resultX = x + (int)dir[i].x;
+            int resultY = y + (int)dir[i].y;
+            if (_mapController.GetChipState(resultX, resultY) == MapController.STATE.NONE)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 }

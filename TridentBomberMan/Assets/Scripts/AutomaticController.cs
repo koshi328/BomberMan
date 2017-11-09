@@ -22,10 +22,9 @@ public class AutomaticController : ControllerBase
         if (_player._state == Player.STATE.MOVE) return;
         if (_mapNavigation.GetCanSafetyBombPut(_player.GetPosition().x, _player.GetPosition().y) <= 0.0f)
         {
-            if (_mapNavigation.CheckWall(_player.GetPosition().x, _player.GetPosition().y))
                 _player.SetBomb();
         }
-        //else
+        else
         {
             Vector2 direction = GetDirection();
 
@@ -76,8 +75,7 @@ public class AutomaticController : ControllerBase
             int y = _player.GetPosition().y + (int)dir[i].y;
             int ex = _player.GetPosition().x + (int)dir[elem].x;
             int ey = _player.GetPosition().y + (int)dir[elem].y;
-            if (_map.GetChipState(x, y) == MapController.STATE.IMMUTABLE_BLOCK ||
-                _map.GetChipState(x, y) == MapController.STATE.BREAKABLE_BLOCK) continue;
+            if (_map.GetChipState(x, y) != MapController.STATE.NONE) continue;
             if (_mapNavigation.GetScore(x, y) < _mapNavigation.GetScore(ex, ey))
             {
                 elem = i;
@@ -85,7 +83,9 @@ public class AutomaticController : ControllerBase
         }
         int resultX = _player.GetPosition().x + (int)dir[elem].x;
         int resultY = _player.GetPosition().y + (int)dir[elem].y;
-        if (_mapNavigation.GetScore(resultX, resultY) >= 0.95f)
+        float currentScore = _mapNavigation.GetBombInfluence(_player.GetPosition().x, _player.GetPosition().y);
+        float nextScore = _mapNavigation.GetScore(resultX, resultY);
+        if ((currentScore <= 0.0) && nextScore >= 0.1f)
         {
             return Vector2.zero;
         }
