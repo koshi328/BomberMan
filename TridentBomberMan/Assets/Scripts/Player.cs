@@ -107,16 +107,16 @@ public class Player : MapObject
         _state = STATE.STAY;
 
         // ボムの最大所持数
-        _maxBombNum = 1;
+        _maxBombNum = 2;
 
         // ボムの現在の所持数
         _currentBombNum = _maxBombNum;
 
         // 火力レベル
-        _fireLevel = 1;
+        _fireLevel = 3;
 
         // スピードレベル
-        _speedLevel = 1;
+        _speedLevel = 8;
 
         // 向いてる方向
         _currentDirection = Vector2.down;

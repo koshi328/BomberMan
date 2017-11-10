@@ -61,7 +61,7 @@ public class BattleManager : MonoBehaviour
     {
         // 設定シーンで設定した値を入れられるように後でする予定
         _playerNum = 4;
-        _humanNum = 0;
+        _humanNum = 1;
 
         // マップを生成
         _map.Init();
