@@ -30,9 +30,14 @@ public class MapNavigation : MonoBehaviour
             {
                 debugs[i, j] = Instantiate(debugPrefab);
                 debugs[i, j].transform.parent = this.transform;
-                debugs[i, j].transform.localPosition = new Vector3(i * 0.32f, j * 0.32f, 0);
+                debugs[i, j].transform.localPosition = new Vector3(i * 0.16f, j * 0.16f, 0);
             }
         }
+    }
+
+    private void Update()
+    {
+        Dump();
     }
 
     public void MyUpdate()
@@ -44,7 +49,7 @@ public class MapNavigation : MonoBehaviour
                 field[i, j] = (_mapController.GetChipState(i, j) != MapController.STATE.NONE) ? 1.0f : 0.0f;
                 bombInfluenceMap[i, j] = 0.0f;
                 setbombInfluenceMap[i, j] = 0.0f;
-                if (CheckWall(i, j)) field[i, j] -= 0.5f;
+                if (CheckWall(i, j)) field[i, j] -= 0.2f;
             }
         }
         CalcInfluence();
@@ -57,7 +62,7 @@ public class MapNavigation : MonoBehaviour
             {
                 if (IsCloseChip(i, j))
                 {
-                    bombInfluenceMap[i, j] = 1.0f;
+                    bombInfluenceMap[i, j] = 5.0f;
                 }
             }
         }
@@ -80,12 +85,19 @@ public class MapNavigation : MonoBehaviour
 
     void CulcSetbombInfluence()
     {
+        bool existBlock = ExistBreakableBlock();
         for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
             {
                 if (_mapController.GetChipState(i, j) != MapController.STATE.NONE)
                 {
+                    continue;
+                }
+                if ((!existBlock) && (Random.Range(0, 5) == 0) && CanSafetyBombPut(i, j, i, j))
+                {
+                    setbombInfluenceMap[i, j] = 1.0f;
+                    BombRouteCulc(i, j);
                     continue;
                 }
                 if (CheckWall(i, j) && CanSafetyBombPut(i, j, i, j))
@@ -147,7 +159,7 @@ public class MapNavigation : MonoBehaviour
                 {
                     break;
                 }
-                bombInfluenceMap[x, y] = 1.0f - (j / 13.0f);
+                bombInfluenceMap[x, y] = (1.0f - (j / 8.0f));// / (bomb._currentElapsedTime / 2 + 1.0f);
             }
         }
     }
@@ -157,9 +169,13 @@ public class MapNavigation : MonoBehaviour
     // dir = 2 左
     // dir = 3 上
     // dir = 4 下
-    bool CanSafetyBombPut(int bx,int by, int x, int y,int dir = 0)
+    bool CanSafetyBombPut(int bx, int by, int x, int y, int dir = 0)
     {
         if (_mapController.GetChipState(x, y) != MapController.STATE.NONE)
+        {
+            return false;
+        }
+        if (bombInfluenceMap[x, y] >= 0.3f)
         {
             return false;
         }
@@ -199,7 +215,7 @@ public class MapNavigation : MonoBehaviour
                 s += GetScore(j, i) + ",";
                 //s += setbombInfluenceMap[j,i] + ",";
                 float c = setbombInfluenceMap[j, i];
-                c = GetScore(j,i);
+                c = GetScore(j, i);
                 //c = bombInfluenceMap[j, i]; ;
                 if (c <= 0.0f)
                     debugs[j, i].GetComponent<SpriteRenderer>().color = new Color(1, 0, 0, 1.0f);
@@ -210,7 +226,7 @@ public class MapNavigation : MonoBehaviour
         }
     }
 
-    public float GetScore(int x,int y)
+    public float GetScore(int x, int y)
     {
         if (_mapController.GetChipState(x, y) != MapController.STATE.NONE) return 1.0f;
         float score = 0.0f;
@@ -219,7 +235,7 @@ public class MapNavigation : MonoBehaviour
         score += field[x, y] * 0.1f;
         return score;
     }
-    public float GetCanSafetyBombPut(int x,int y)
+    public float GetCanSafetyBombPut(int x, int y)
     {
         return setbombInfluenceMap[x, y];
     }
@@ -227,7 +243,7 @@ public class MapNavigation : MonoBehaviour
     {
         return bombInfluenceMap[x, y];
     }
-    public bool CheckWall(int x,int y)
+    public bool CheckWall(int x, int y)
     {
         Vector2[] dir =
         {
@@ -266,5 +282,20 @@ public class MapNavigation : MonoBehaviour
             }
         }
         return true;
+    }
+
+    public bool ExistBreakableBlock()
+    {
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0; j < height; j++)
+            {
+                if (_mapController.GetChipState(i, j) == MapController.STATE.BREAKABLE_BLOCK)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
