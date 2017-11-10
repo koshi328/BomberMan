@@ -16,7 +16,7 @@ public class BattleManager : MonoBehaviour
 
     // プレイヤーのプレハブ
     [SerializeField]
-    private GameObject _playerPrefab;
+    private GameObject[] _playerPrefabs;
 
     // プレイヤーの情報
     private Player[] _playerInfo;
@@ -88,7 +88,7 @@ public class BattleManager : MonoBehaviour
         // インスタンスの生成と配置
         for (int i = 0; i < _playerNum; i++)
         {
-            _playerInstances[i] = Instantiate(_playerPrefab);
+            _playerInstances[i] = Instantiate(_playerPrefabs[i]);
         }
 
         // インスタンスから情報を取り出す

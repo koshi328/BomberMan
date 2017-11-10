@@ -81,6 +81,9 @@ public class Player : MapObject
     public static readonly float MOVE_TIME_LEVEL_ONE = 0.4f;
     public static readonly float MOVE_TIME_INTERVAL = 0.04f;
 
+    [SerializeField]
+    private Animator _animator;
+
     /// <summary>
     /// 移動のコルーチン
     /// </summary>
@@ -207,6 +210,10 @@ public class Player : MapObject
 
         // 向いてる方向を更新
         _currentDirection = direction;
+
+        // アニメーションを切り替え
+        _animator.SetFloat("x", direction.x);
+        _animator.SetFloat("y", direction.y);
 
         // チップの情報を保存するための変数とりあえず破壊不可能ブロック
         MapController.STATE state = MapController.STATE.IMMUTABLE_BLOCK;

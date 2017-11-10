@@ -12,23 +12,14 @@ public class TitleSceneManager : MonoBehaviour
     // アニメーションで上下させる縦幅
     private readonly float INTERVAL_Y = 30.0f;
 
-    // 待機時間
-    private readonly float WAIT_TIME = 0.2f;
-
     [SerializeField]
     private Image _imageLogo;
 
     [SerializeField]
     private Image _imagePress;
 
-    [SerializeField]
-    private SpriteRenderer _fadeSprite;
-
     // シーン遷移中か？
     private bool _isChanging = false;
-
-    // 時間
-    private float _elapsedTime = 0.0f;
 
 
 
@@ -49,7 +40,7 @@ public class TitleSceneManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            SceneManager.LoadScene("Game", LoadSceneMode.Single);
+            SceneManager.LoadScene("Edit", LoadSceneMode.Single);
             _isChanging = true;
         }
     }
