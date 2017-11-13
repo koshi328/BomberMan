@@ -16,7 +16,7 @@ public class changeScenePlay : MonoBehaviour
     void Update()
     {
 
-        if (Input.GetKeyDown("space"))
+        if (Input.GetButtonDown("Submit"))
         {
             Vector2 tmp = GameObject.Find("wakusen1").transform.position;
             if (tmp.y > 850 && tmp.y < 950)

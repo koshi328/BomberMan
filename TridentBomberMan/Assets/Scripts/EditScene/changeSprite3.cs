@@ -21,7 +21,8 @@ public class changeSprite3 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown("space"))
+        if (Input.GetButtonDown("Submit"))
+
         {
             Vector2 tmp = GameObject.Find("wakusen1").transform.position;
             if (tmp.y > 250 && tmp.y < 350)

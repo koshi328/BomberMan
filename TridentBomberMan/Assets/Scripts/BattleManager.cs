@@ -3,9 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class BattleManager : MonoBehaviour
 {
+    public static readonly float BACKBUTTON_X = -4.0f;
+    public static readonly float BACKBUTTON_Y = -4.9f;
+    public static readonly float REPLAYBUTTON_X = 4.0f;
+    public static readonly float REPLAYBUTTON_Y = -4.9f;
+
     // マップ
     [SerializeField]
     private MapController _map;
@@ -26,11 +32,7 @@ public class BattleManager : MonoBehaviour
 
     // プレイヤーキャラクターの数
     [SerializeField]
-    public int _playerNum
-    {
-        get;
-        set;
-    }
+    public int _playerNum;
 
     // 人間の数
     [SerializeField]
@@ -49,6 +51,22 @@ public class BattleManager : MonoBehaviour
     [SerializeField]
     private GameObject _finishSprite;
 
+    [SerializeField]
+    private GameObject[] _winPlayerSprite;
+
+    [SerializeField]
+    private GameObject[] _selectButton;
+
+    [SerializeField]
+    private GameObject _selectingFrame;
+
+    private int _selectingNumber;
+
+    private bool _selectIsMoving;
+
+    private float _selectCount;
+
+
     void Awake ()
     {
         DOTween.Init();    // ← コレないと効かない
@@ -60,8 +78,8 @@ public class BattleManager : MonoBehaviour
     void Init()
     {
         // 設定シーンで設定した値を入れられるように後でする予定
-        _playerNum = 4;
-        _humanNum = 1;
+        //_playerNum = 4;
+        //_humanNum = 0;
 
         // マップを生成
         _map.Init();
@@ -81,9 +99,23 @@ public class BattleManager : MonoBehaviour
         _timeText.transform.position = new Vector2(100.0f, 100.0f);
 
         // 終了を知らせる画像
-        _finishSprite.transform.position = Vector3.zero;
         _finishSprite.transform.localScale = Vector3.zero;
         _finishSprite.gameObject.SetActive(false);
+
+        // 勝利プレイヤーの画像
+        for (int i = 0; i < 4; i++)
+        {
+            _winPlayerSprite[i].transform.localScale = Vector3.zero;
+            _winPlayerSprite[i].SetActive(false);
+        }
+
+        // ボタン
+        _selectButton[0].transform.localPosition = new Vector3(BACKBUTTON_X, BACKBUTTON_Y - 10.0f, 0.0f);
+        _selectButton[0].SetActive(false);
+        _selectButton[1].transform.localPosition = new Vector3(REPLAYBUTTON_X, REPLAYBUTTON_Y -10.0f, 0.0f);
+        _selectButton[1].SetActive(false);
+        _selectingFrame.transform.localPosition = new Vector3(REPLAYBUTTON_X, REPLAYBUTTON_Y -10.0f, 0.0f);
+        _selectingFrame.SetActive(false);
 
         // インスタンスの生成と配置
         for (int i = 0; i < _playerNum; i++)
@@ -138,6 +170,12 @@ public class BattleManager : MonoBehaviour
         }
 
         _mapNavigation = GameObject.Find("MapNavigation").GetComponent<MapNavigation>();
+
+        _selectingNumber = 0;
+
+        _selectIsMoving = false;
+
+        _selectCount = 0.5f;
     }
 	
 	void Update ()
@@ -152,12 +190,18 @@ public class BattleManager : MonoBehaviour
             if (_time < 0.0f)
             {
                 _time = 0.0f;
-                _finishSprite.gameObject.SetActive(true);
-                _finishSprite.transform.DOScale(2.0f, 2.0f).SetEase(Ease.OutBounce);
+                _selectButton[0].SetActive(true);
+                _selectButton[0].transform.DOMoveY(BACKBUTTON_Y, 0.5f);
+                _selectButton[1].SetActive(true);
+                _selectButton[1].transform.DOMoveY(REPLAYBUTTON_Y, 0.5f);
+                _selectingFrame.SetActive(true);
+                _selectingFrame.transform.DOMoveY(REPLAYBUTTON_Y, 0.5f);
                 _isFinished = true;
             }
 
+            // 生存プレイヤーの人数と生存プレイヤーの番号
             int alivePlayerNum = 0;
+            int alivePlayer = 0;
 
             // プレイヤーが1人以下なら
             for(int i = 0;i< _playerNum;i++)
@@ -165,13 +209,31 @@ public class BattleManager : MonoBehaviour
                 if(_playerInfo[i].GetStatus(Player.ISALIVE))
                 {
                     alivePlayerNum++;
+                    alivePlayer = i;
                 }
             }
 
-            if(alivePlayerNum <= 1)
+            if(alivePlayerNum == 1)
             {
                 _finishSprite.gameObject.SetActive(true);
                 _finishSprite.transform.DOScale(2.0f, 2.0f).SetEase(Ease.OutBounce);
+                _winPlayerSprite[alivePlayer].SetActive(true);
+                _winPlayerSprite[alivePlayer].transform.DOScale(1.5f, 1.5f).SetEase(Ease.OutBounce);
+                _selectButton[0].SetActive(true);
+                _selectButton[0].transform.DOMoveY(BACKBUTTON_Y, 0.5f);
+                _selectButton[1].SetActive(true);
+                _selectButton[1].transform.DOMoveY(REPLAYBUTTON_Y, 0.5f);
+                _selectingFrame.SetActive(true);
+                _isFinished = true;
+            }
+            else if(alivePlayerNum < 1)
+            {
+                _selectButton[0].SetActive(true);
+                _selectButton[0].transform.DOMoveY(BACKBUTTON_Y, 0.5f);
+                _selectButton[1].SetActive(true);
+                _selectButton[1].transform.DOMoveY(REPLAYBUTTON_Y, 0.5f);
+                _selectingFrame.SetActive(true);
+                _selectingFrame.transform.DOMoveY(REPLAYBUTTON_Y, 0.5f);
                 _isFinished = true;
             }
         }
@@ -188,6 +250,13 @@ public class BattleManager : MonoBehaviour
                 _controllers[i].MyUpdate();
             }
         }
+
+        if (float.Epsilon < GamepadInput.GamePad.GetTrigger(GamepadInput.GamePad.Trigger.LeftTrigger, GamepadInput.GamePad.Index.One))
+        {
+            SceneManager.LoadScene("Game");
+        }
+
+        UseButton();
     }
 
     /// <summary>
@@ -201,5 +270,63 @@ public class BattleManager : MonoBehaviour
         if (_playerNum < n) return null;
 
         return _playerInfo[n];
+    }
+
+    /// <summary>
+    /// ボタンを選択したり押したりする
+    /// </summary>
+    private void UseButton()
+    {
+        if (!_isFinished) return;
+
+        // 選択中なら待つ
+        if(_selectIsMoving)
+        {
+            _selectCount -= Time.deltaTime;
+
+            if (_selectCount < 0.0f)
+            {
+                _selectIsMoving = false;
+            }
+        }
+        else
+        {
+            Vector2 axis = GamepadInput.GamePad.GetAxis(GamepadInput.GamePad.Axis.LeftStick, GamepadInput.GamePad.Index.One);
+
+            // 左右で選択
+            if (0.9f < Mathf.Abs(axis.x) ||
+                Input.GetKey(KeyCode.RightArrow) ||
+                Input.GetKey(KeyCode.LeftArrow))
+            {
+                _selectIsMoving = true;
+                _selectCount = 0.1f;
+
+                _selectingNumber = 1 - _selectingNumber;
+
+                if (_selectingNumber == 0)
+                {
+                    _selectingFrame.transform.localPosition = new Vector3(BACKBUTTON_X, BACKBUTTON_Y, 0.0f);
+                }
+                else
+                {
+                    _selectingFrame.transform.localPosition = new Vector3(REPLAYBUTTON_X, REPLAYBUTTON_Y, 0.0f);
+                }
+            }
+        }
+
+        // 決定する
+        if (GamepadInput.GamePad.GetButtonDown(GamepadInput.GamePad.Button.X, GamepadInput.GamePad.Index.One) ||
+        Input.GetKeyDown(KeyCode.Space))
+        {
+            switch (_selectingNumber)
+            {
+                case 0:
+                    SceneManager.LoadScene("Edit", LoadSceneMode.Single);
+                    break;
+                case 1:
+                    SceneManager.LoadScene("Game", LoadSceneMode.Single);
+                    break;
+            }
+        }
     }
 }

@@ -21,23 +21,31 @@ public class HumanController : ControllerBase
         Vector2 direction = Vector2.zero;
 
         // 取得するキー情報のタグ
-        var horizontal = "Horizontal" + (_player._playerNumber + 1).ToString() + "P";
-        var vertical = "Vertical" + (_player._playerNumber + 1).ToString() + "P";
+        var leftStickHorizontal = "L_XAxis_" + (_player._playerNumber + 1).ToString();
+        var leftStickVertical = "L_YAxis_" + (_player._playerNumber + 1).ToString();
+        var dpadHorizontal = "DPad_XAxis_" + (_player._playerNumber + 1).ToString();
+        var dpadVertical= "DPad_YAxis_" + (_player._playerNumber + 1).ToString();
 
         // 入力を取得
-        float xInput = Input.GetAxisRaw(horizontal);
-        float yInput = Input.GetAxisRaw(vertical);
+        float xInput = Input.GetAxisRaw(leftStickHorizontal);
+        float yInput = Input.GetAxisRaw(leftStickVertical);
+        if (Mathf.Abs(xInput) < float.Epsilon &&
+            Mathf.Abs(yInput) < float.Epsilon)
+        {
+            xInput = Input.GetAxisRaw(dpadHorizontal);
+            yInput = Input.GetAxisRaw(dpadVertical);
+        }
 
         // 縦方向の移動の入力がされていたら
         if (float.Epsilon < Mathf.Abs(yInput))
         {
             if (yInput < 0)
             {
-                direction = Vector2.down;
+                direction = Vector2.up;
             }
             else
             {
-                direction = Vector2.up;
+                direction = Vector2.down;
             }
         }
         else if (float.Epsilon < Mathf.Abs(xInput))
@@ -70,10 +78,28 @@ public class HumanController : ControllerBase
     {
         base.ControlSetBomb();
 
-        var buttonName = "SetBomb" + (_player._playerNumber + 1).ToString() + "P";
+        GamepadInput.GamePad.Index index;
 
-        // ボタンが押されていたら
-        if (Input.GetButtonDown(buttonName))
+        switch(_player._playerNumber)
+        {
+            case 0:
+                index = GamepadInput.GamePad.Index.One;
+                break;
+            case 1:
+                index = GamepadInput.GamePad.Index.Two;
+                break;
+            case 2:
+                index = GamepadInput.GamePad.Index.Three;
+                break;
+            case 3:
+                index = GamepadInput.GamePad.Index.Four;
+                break;
+            default:
+                index = GamepadInput.GamePad.Index.One;
+                break;
+        }
+
+        if (GamepadInput.GamePad.GetButtonDown(GamepadInput.GamePad.Button.X, index))
         {
             if (!_player.GetStatus(Player.ISMISOBON))
             {
