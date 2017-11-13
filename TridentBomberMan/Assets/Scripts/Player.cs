@@ -296,22 +296,23 @@ public class Player : MapObject
     /// <summary>
     /// ボムを置く
     /// </summary>
-    public void SetBomb()
+    public bool SetBomb()
     {
         // ボムが残っていなければおけない
         if (_currentBombNum < 1)
         {
-            return;
+            return false;
         }
 
         // ボムが置いてあるところにはおけない
         if(_map.GetChipState(_position.x, _position.y) == MapController.STATE.BOMB)
         {
-            return;
+            return false;
         }
 
         _currentBombNum--;
         _map.SetBomb(_playerNumber, GetPosition().x, GetPosition().y, _fireLevel);
+        return true;
     }
 
     /// <summary>
