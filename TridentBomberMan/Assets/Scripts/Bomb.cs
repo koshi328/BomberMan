@@ -9,7 +9,7 @@ public class Bomb : MapObject
     public int _playerNumber { get; set; }
 
     // 爆発までの時間
-    public static readonly float LIMIT_TIME = 0.5f;
+    public static readonly float LIMIT_TIME = 3.0f;
 
     // 爆発までの残り時間
     public float _currentElapsedTime;

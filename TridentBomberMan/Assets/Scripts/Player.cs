@@ -110,16 +110,16 @@ public class Player : MapObject
         _state = STATE.STAY;
 
         // ボムの最大所持数
-        _maxBombNum = 2;
+        _maxBombNum = 1;
 
         // ボムの現在の所持数
         _currentBombNum = _maxBombNum;
 
         // 火力レベル
-        _fireLevel = 3;
+        _fireLevel = 1;
 
         // スピードレベル
-        _speedLevel = 8;
+        _speedLevel = 1;
 
         // 向いてる方向
         _currentDirection = Vector2.down;
@@ -296,22 +296,23 @@ public class Player : MapObject
     /// <summary>
     /// ボムを置く
     /// </summary>
-    public void SetBomb()
+    public bool SetBomb()
     {
         // ボムが残っていなければおけない
         if (_currentBombNum < 1)
         {
-            return;
+            return false;
         }
 
         // ボムが置いてあるところにはおけない
         if(_map.GetChipState(_position.x, _position.y) == MapController.STATE.BOMB)
         {
-            return;
+            return false;
         }
 
         _currentBombNum--;
         _map.SetBomb(_playerNumber, GetPosition().x, GetPosition().y, _fireLevel);
+        return true;
     }
 
     /// <summary>

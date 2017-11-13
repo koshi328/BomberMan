@@ -85,19 +85,12 @@ public class MapNavigation : MonoBehaviour
 
     void CulcSetbombInfluence()
     {
-        bool existBlock = ExistBreakableBlock();
         for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
             {
                 if (_mapController.GetChipState(i, j) != MapController.STATE.NONE)
                 {
-                    continue;
-                }
-                if ((!existBlock) && (Random.Range(0, 5) == 0) && CanSafetyBombPut(i, j, i, j))
-                {
-                    setbombInfluenceMap[i, j] = 1.0f;
-                    BombRouteCulc(i, j);
                     continue;
                 }
                 if (CheckWall(i, j) && CanSafetyBombPut(i, j, i, j))
@@ -159,7 +152,7 @@ public class MapNavigation : MonoBehaviour
                 {
                     break;
                 }
-                bombInfluenceMap[x, y] = (1.0f - (j / 8.0f));// / (bomb._currentElapsedTime / 2 + 1.0f);
+                bombInfluenceMap[x, y] += (1.0f - (j / 10.0f)) / (bomb._currentElapsedTime / 2 + 1.0f);
             }
         }
     }
