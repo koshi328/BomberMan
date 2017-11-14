@@ -103,6 +103,7 @@ public class Bomb : MapObject
             if(player.GetPosition().x == destination.x &&
                 player.GetPosition().y == destination.y)
             {
+                AudioController.Play("BombKickHit");
                 player.SetStatus(Player.ISSTAN, true);
                 return;
             }

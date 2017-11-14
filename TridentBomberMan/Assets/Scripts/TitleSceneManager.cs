@@ -30,18 +30,28 @@ public class TitleSceneManager : MonoBehaviour
                 new Vector3(_imageLogo.rectTransform.localPosition.x, _imageLogo.rectTransform.localPosition.y) }, 10.0f, PathType.CatmullRom).SetLoops(-1);
 
         _imagePress.rectTransform.DOLocalPath(
-    new Vector3[] { new Vector3(_imagePress.rectTransform.localPosition.x, _imagePress.rectTransform.localPosition.y + INTERVAL_Y),
+            new Vector3[] { new Vector3(_imagePress.rectTransform.localPosition.x, _imagePress.rectTransform.localPosition.y + INTERVAL_Y),
                 new Vector3(_imagePress.rectTransform.localPosition.x, _imagePress.rectTransform.localPosition.y) }, 5.0f, PathType.CatmullRom).SetLoops(-1);
+
+        var go = GameObject.Find("FadeManager");
+        FadeManager fadeManager = go.GetComponent<FadeManager>();
+        fadeManager.FadeIn();
+
+        AudioController.PlayMusic("TitleBgm");
     }
 
     void Update()
     {
         if (_isChanging) return;
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (GamepadInput.GamePad.GetButtonDown(GamepadInput.GamePad.Button.X, GamepadInput.GamePad.Index.One))
         {
-            SceneManager.LoadScene("Edit", LoadSceneMode.Single);
             _isChanging = true;
+            AudioController.Play("Decide");
+
+            var go = GameObject.Find("FadeManager");
+            FadeManager fadeManager = go.GetComponent<FadeManager>();
+            fadeManager.ChangeScene(1);
         }
     }
 }

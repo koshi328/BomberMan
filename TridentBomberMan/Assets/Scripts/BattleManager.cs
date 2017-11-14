@@ -73,6 +73,13 @@ public class BattleManager : MonoBehaviour
         DOTween.defaultEaseType = Ease.InOutQuad;
 
         Init();
+
+        AudioController.PlayMusic("GameBgm");
+
+        var go = GameObject.Find("FadeManager");
+        if (!go) return;
+        FadeManager fadeManager = go.GetComponent<FadeManager>();
+        fadeManager.FadeIn();
     }
 
     void Init()
@@ -195,6 +202,7 @@ public class BattleManager : MonoBehaviour
                 _selectingFrame.SetActive(true);
                 _selectingFrame.transform.DOMoveY(REPLAYBUTTON_Y, 0.5f);
                 _isFinished = true;
+                AudioController.Play("Finish");
             }
 
             // 生存プレイヤーの人数と生存プレイヤーの番号
@@ -296,6 +304,7 @@ public class BattleManager : MonoBehaviour
                 Input.GetKey(KeyCode.RightArrow) ||
                 Input.GetKey(KeyCode.LeftArrow))
             {
+                AudioController.Play("Select");
                 _selectIsMoving = true;
                 _selectCount = 0.1f;
 
@@ -316,6 +325,7 @@ public class BattleManager : MonoBehaviour
         if (GamepadInput.GamePad.GetButtonDown(GamepadInput.GamePad.Button.X, GamepadInput.GamePad.Index.One) ||
         Input.GetKeyDown(KeyCode.Space))
         {
+            AudioController.Play("Decide");
             switch (_selectingNumber)
             {
                 case 0:

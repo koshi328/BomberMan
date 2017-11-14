@@ -242,6 +242,8 @@ public class MapController : MonoBehaviour
     /// <param name="fireLevel"></param>
     public void SetBomb(int playerNumber, int x, int y, int fireLevel)
     {
+        AudioController.Play("BombSet");
+
         for (int i = 0; i < BOMB_LIMIT_NUM; i++)
         {
             // 使用中なら次のボムをチェック
@@ -289,6 +291,8 @@ public class MapController : MonoBehaviour
     /// <param name="fireLevel"></param>
     private void ExplodeBomb(Bomb bomb)
     {
+        AudioController.Play("BombExplode");
+
         // ボムの所持数を回復
         _battleManager.GetPlayer(bomb._playerNumber)._currentBombNum++;
 

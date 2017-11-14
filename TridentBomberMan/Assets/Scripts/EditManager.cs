@@ -15,7 +15,7 @@ public class EditManager : MonoBehaviour {
     int[] _playerState;
     int _selectNum;
     // Use this for initialization
-    void Start () {
+    void Awake () {
         _selectNum = 0;
         SetButton(_selectNum);
         _playerState = new int[4];
@@ -23,12 +23,16 @@ public class EditManager : MonoBehaviour {
         {
             _playerState[i] = i;
         }
+
+        AudioController.PlayMusic("EditBgm");
     }
 	
 	// Update is called once per frame
 	void Update () {
-		if(Input.GetKeyDown(KeyCode.UpArrow))
+        if (GamepadInput.GamePad.GetButtonDown(GamepadInput.GamePad.Button.A, GamepadInput.GamePad.Index.One))
         {
+            AudioController.Play("Select");
+
             if (++_selectNum >= _buttonList.Length) _selectNum = 0;
             SetButton(_selectNum);
         }
@@ -36,7 +40,24 @@ public class EditManager : MonoBehaviour {
 
     public void ChangeScene(string name)
     {
-        SceneManager.LoadScene(name);
+        AudioController.Play("Decide");
+
+        var go = GameObject.Find("FadeManager");
+        if (!go) return;
+        FadeManager fadeManager = go.GetComponent<FadeManager>();
+
+        if(name == "Title")
+        {
+            fadeManager.ChangeScene(0);
+        }
+        else if(name == "Edit")
+        {
+            fadeManager.ChangeScene(1);
+        }
+        else
+        {
+            fadeManager.ChangeScene(2);
+        }
     }
 
     void SetButton(int num)

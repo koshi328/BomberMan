@@ -38,23 +38,29 @@ public class Item : MapObject
             case KIND.SPEED_UP:
                 if (Player.SPEED_MAX <= player._speedLevel) return;
                 player._speedLevel += 1;
+                AudioController.Play("StatusUp");
                 break;
             case KIND.FIRE_UP:
                 if (Player.FIRE_MAX <= player._fireLevel) return;
                 player._fireLevel += 1;
+                AudioController.Play("StatusUp");
                 break;
             case KIND.FIRE_FULL:
                 player._fireLevel = Player.FIRE_MAX;
+                AudioController.Play("StatusUp");
                 break;
             case KIND.BOMB_UP:
                 player._maxBombNum = player._maxBombNum + 1;
                 player._currentBombNum = player._currentBombNum + 1;
+                AudioController.Play("StatusUp");
                 break;
             case KIND.BOMB_KICK:
                 player.SetStatus(Player.KICKABLE, true);
+                AudioController.Play("StatusUp");
                 break;
             case KIND.INVINCIBLE:
                 player.SetStatus(Player.INVINCIBLE, true);
+                AudioController.Play("StatusUp");
                 break;
             case KIND.DOKURO:
                 int n = Random.Range(1, 4);
@@ -70,6 +76,7 @@ public class Item : MapObject
                         player.SetStatus(Player.ISCONFUSION, true);
                         break;
                 }
+                AudioController.Play("StatusDown");
                 break;
         }
     }

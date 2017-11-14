@@ -84,6 +84,9 @@ public class Player : MapObject
     [SerializeField]
     private Animator _animator;
 
+    [SerializeField]
+    private SpriteRenderer _spriteRenderer;
+
     /// <summary>
     /// 移動のコルーチン
     /// </summary>
@@ -129,6 +132,8 @@ public class Player : MapObject
 
         // すり抜けのタイマーの初期化
         _invincibleTimer = INVINCIBLE_TIME;
+
+        _spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     public void MyUpdate()
@@ -136,11 +141,12 @@ public class Player : MapObject
         if (GetStatus(INVINCIBLE))
         {
             _invincibleTimer -= Time.deltaTime;
-
+            _spriteRenderer.color = new Color(1.0f, 1.0f, 1.0f, 0.5f);
             if (_invincibleTimer < 0.0f)
             {
                 SetStatus(INVINCIBLE, false);
                 _invincibleTimer = INVINCIBLE_TIME;
+                _spriteRenderer.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
             }
         }
 
@@ -244,6 +250,7 @@ public class Player : MapObject
                 // 目的地にボムがあって、キック可能ならキック！
                 if (GetStatus(KICKABLE))
                 {
+                    AudioController.Play("BombKick");
                     _map.MoveBomb(destination.x, destination.y, direction);
                 }
                 return;
