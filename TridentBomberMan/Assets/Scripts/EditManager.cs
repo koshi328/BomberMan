@@ -14,6 +14,10 @@ public class EditManager : MonoBehaviour {
 
     int[] _playerState;
     int _selectNum;
+
+    public static readonly float INPUT_INTERVAL = 0.1f;
+    float _intervalTime;
+
     // Use this for initialization
     void Awake () {
         _selectNum = 0;
@@ -24,19 +28,56 @@ public class EditManager : MonoBehaviour {
             _playerState[i] = i;
         }
 
+        _intervalTime = 0.0f;
+
         AudioController.PlayMusic("EditBgm");
     }
 	
 	// Update is called once per frame
 	void Update () {
-        if (GamepadInput.GamePad.GetButtonDown(GamepadInput.GamePad.Button.A, GamepadInput.GamePad.Index.One))
-        {
-            AudioController.Play("Select");
 
-            if (++_selectNum >= _buttonList.Length) _selectNum = 0;
-            SetButton(_selectNum);
+        if (_intervalTime < INPUT_INTERVAL)
+        {
+            _intervalTime += Time.deltaTime;
         }
-	}
+        else
+        {
+            _intervalTime = 0.0f;
+
+            // 取得するキー情報のタグ
+            var leftStickHorizontal = "L_XAxis_1";
+            var leftStickVertical = "L_YAxis_1";
+            var dpadHorizontal = "DPad_XAxis_1";
+            var dpadVertical = "DPad_YAxis_1";
+
+            // 入力を取得
+            float xInput = Input.GetAxisRaw(leftStickHorizontal);
+            float yInput = Input.GetAxisRaw(leftStickVertical);
+            if (Mathf.Abs(xInput) < float.Epsilon &&
+                Mathf.Abs(yInput) < float.Epsilon)
+            {
+                xInput = Input.GetAxisRaw(dpadHorizontal);
+                yInput = Input.GetAxisRaw(dpadVertical);
+            }
+
+            // 縦方向の移動の入力がされていたら
+            if (float.Epsilon < Mathf.Abs(yInput))
+            {
+                AudioController.Play("Select");
+
+                if (yInput < 0)
+                {
+                    if (--_selectNum < 0) _selectNum = _buttonList.Length - 1;
+                    SetButton(_selectNum);
+                }
+                else
+                {
+                    if (++_selectNum >= _buttonList.Length) _selectNum = 0;
+                    SetButton(_selectNum);
+                }
+            }
+        }
+    }
 
     public void ChangeScene(string name)
     {
@@ -57,13 +98,32 @@ public class EditManager : MonoBehaviour {
         else
         {
             fadeManager.ChangeScene(2);
+
+            var go2 = GameObject.Find("GlobalData");
+            if (!go2) return;
+            GlobalData globalData = go2.GetComponent<GlobalData>();
+            int playerNum = 0;
+            int humanNum = 0;
+            for(int i = 0; i < _playerState.Length; i++)
+            {
+                if (_playerState[i] < 4)
+                {
+                    playerNum++;
+                    humanNum++;
+                }
+                else if (_playerState[i] != 7)
+                {
+                    playerNum++;
+                }
+            }
+            globalData.SetData(playerNum, humanNum);
         }
     }
 
     void SetButton(int num)
     {
         _buttonList[num].Select();
-        _cursor.rectTransform.sizeDelta = _buttonList[num].image.rectTransform.sizeDelta + new Vector2(10, 10);
+        _cursor.rectTransform.sizeDelta = _buttonList[num].image.rectTransform.sizeDelta + new Vector2(15, 15);
         _cursor.rectTransform.position = _buttonList[num].image.rectTransform.position;
     }
 

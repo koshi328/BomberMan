@@ -31,11 +31,9 @@ public class BattleManager : MonoBehaviour
     private GameObject[] _playerInstances;
 
     // プレイヤーキャラクターの数
-    [SerializeField]
     public int _playerNum;
 
     // 人間の数
-    [SerializeField]
     private int _humanNum;
 
     // 対戦が終了しているか？
@@ -66,6 +64,18 @@ public class BattleManager : MonoBehaviour
 
     private float _selectCount;
 
+    private bool _isReady;
+
+    [SerializeField]
+    private GameObject _readyBg;
+
+    [SerializeField]
+    private GameObject[] _readySprite;
+
+    private int _countDown;
+
+    private float _selectWait;
+
 
     void Awake ()
     {
@@ -85,6 +95,11 @@ public class BattleManager : MonoBehaviour
     void Init()
     {
         // 設定シーンで設定した値を入れられるように後でする予定
+        var go = GameObject.Find("GlobalData");
+        if (!go) return;
+        GlobalData globalData = go.GetComponent<GlobalData>();
+        _playerNum = globalData._playerNum;
+        _humanNum = globalData._humanNum;
 
         // マップを生成
         _map.Init();
@@ -100,8 +115,9 @@ public class BattleManager : MonoBehaviour
 
         _isFinished = false;
 
-        // 制限時間の表示の配置
-        _timeText.transform.position = new Vector2(100.0f, 100.0f);
+        _isReady = true;
+
+        _countDown = 0;
 
         // 終了を知らせる画像
         _finishSprite.transform.localScale = Vector3.zero;
@@ -181,10 +197,44 @@ public class BattleManager : MonoBehaviour
         _selectIsMoving = false;
 
         _selectCount = 0.5f;
+
+        _readySprite[0].SetActive(true);
+
+        // カウントダウン
+        Sequence sequence = DOTween.Sequence();
+
+        sequence.Append(_readySprite[0].transform.DOScale(0.0f, 1.0f).OnComplete(() => {
+            _readySprite[0].SetActive(false);
+            _readySprite[1].SetActive(true);
+            Debug.Log(2);
+        }));
+
+        sequence.Append(_readySprite[1].transform.DOScale(0.0f, 1.0f).OnComplete(() => {
+             _readySprite[1].SetActive(false);
+             _readySprite[2].SetActive(true);
+            Debug.Log(1);
+         }));
+
+        sequence.Append(_readySprite[2].transform.DOScale(0.0f, 1.0f).OnComplete(() => {
+            _readySprite[2].SetActive(false);
+            _readySprite[3].SetActive(true);
+            Debug.Log("go");
+        }));
+
+        sequence.Append(_readySprite[3].transform.DOScale(0.0f, 1.0f).OnComplete(() => {
+            _readySprite[3].SetActive(false);
+            _readyBg.SetActive(false);
+            _isReady = false;
+        }));
+
+        sequence.Play();
+
+        _selectWait = 2.0f;
     }
 	
 	void Update ()
     {
+        if (_isReady) return;
         // 制限時間の更新
         if (!_isFinished)
         {
@@ -285,8 +335,14 @@ public class BattleManager : MonoBehaviour
     {
         if (!_isFinished) return;
 
+        if (0.0f < _selectWait)
+        {
+            _selectWait -= Time.deltaTime;
+            return;
+        }
+
         // 選択中なら待つ
-        if(_selectIsMoving)
+        if (_selectIsMoving)
         {
             _selectCount -= Time.deltaTime;
 
