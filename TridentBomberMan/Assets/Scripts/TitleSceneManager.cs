@@ -18,8 +18,13 @@ public class TitleSceneManager : MonoBehaviour
     [SerializeField]
     private Image _imagePress;
 
+    [SerializeField]
+    private Image[] _imageBackground;
+
     // シーン遷移中か？
     private bool _isChanging = false;
+
+    private static readonly float SCROLL_SPD = 100.0f;
 
 
 
@@ -42,9 +47,20 @@ public class TitleSceneManager : MonoBehaviour
 
     void Update()
     {
+        for (int i = 0; i < 2; i++)
+        {
+            _imageBackground[i].rectTransform.localPosition -= new Vector3(SCROLL_SPD * Time.deltaTime, 0.0f);
+
+            if(_imageBackground[i].rectTransform.localPosition.x < -1800.0f)
+            {
+                _imageBackground[i].rectTransform.localPosition = new Vector3(1800.0f, 0.0f);
+            }
+        }
+
         if (_isChanging) return;
 
-        if (GamepadInput.GamePad.GetButtonDown(GamepadInput.GamePad.Button.X, GamepadInput.GamePad.Index.One))
+        if (GamepadInput.GamePad.GetButtonDown(GamepadInput.GamePad.Button.X, GamepadInput.GamePad.Index.One) ||
+            Input.GetKeyDown(KeyCode.Space))
         {
             _isChanging = true;
             AudioController.Play("Decide");

@@ -13,9 +13,6 @@ public class HumanController : ControllerBase
     /// </summary>
     public override void ControlMove()
     {
-        // 操作対象が移動中なら処理しない
-        if (_player._state == Player.STATE.MOVE) return;
-
         base.ControlMove();
 
         Vector2 direction = Vector2.zero;
@@ -57,6 +54,29 @@ public class HumanController : ControllerBase
             else
             {
                 direction = Vector2.right;
+            }
+        }
+        else if (_player._playerNumber == 0)
+        {
+            if (Input.GetKey(KeyCode.W) ||
+                Input.GetKeyDown(KeyCode.W))
+            {
+                direction = Vector2.up;
+            }
+            else if (Input.GetKey(KeyCode.S) ||
+                Input.GetKeyDown(KeyCode.S))
+            {
+                direction = Vector2.down;
+            }
+            else if (Input.GetKey(KeyCode.D) ||
+                Input.GetKeyDown(KeyCode.D))
+            {
+                direction = Vector2.right;
+            }
+            else if (Input.GetKey(KeyCode.A) ||
+                Input.GetKeyDown(KeyCode.A))
+            {
+                direction = Vector2.left;
             }
         }
         else
@@ -104,6 +124,17 @@ public class HumanController : ControllerBase
             if (!_player.GetStatus(Player.ISMISOBON))
             {
                 _player.SetBomb();
+            }
+        }
+        else if (_player._playerNumber == 0)
+        {
+            if (Input.GetKey(KeyCode.Return) ||
+                Input.GetKeyDown(KeyCode.Return))
+            {
+                if (!_player.GetStatus(Player.ISMISOBON))
+                {
+                    _player.SetBomb();
+                }
             }
         }
     }

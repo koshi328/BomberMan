@@ -76,6 +76,17 @@ public class EditManager : MonoBehaviour {
                     SetButton(_selectNum);
                 }
             }
+
+            if(Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                if (--_selectNum < 0) _selectNum = _buttonList.Length - 1;
+                SetButton(_selectNum);
+            }
+            else if (Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                if (++_selectNum >= _buttonList.Length) _selectNum = 0;
+                SetButton(_selectNum);
+            }
         }
     }
 

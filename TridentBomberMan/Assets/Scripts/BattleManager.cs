@@ -76,6 +76,9 @@ public class BattleManager : MonoBehaviour
 
     private float _selectWait;
 
+    [SerializeField]
+    private GameObject _drawSprite;
+
 
     void Awake ()
     {
@@ -206,19 +209,16 @@ public class BattleManager : MonoBehaviour
         sequence.Append(_readySprite[0].transform.DOScale(0.0f, 1.0f).OnComplete(() => {
             _readySprite[0].SetActive(false);
             _readySprite[1].SetActive(true);
-            Debug.Log(2);
         }));
 
         sequence.Append(_readySprite[1].transform.DOScale(0.0f, 1.0f).OnComplete(() => {
              _readySprite[1].SetActive(false);
              _readySprite[2].SetActive(true);
-            Debug.Log(1);
          }));
 
         sequence.Append(_readySprite[2].transform.DOScale(0.0f, 1.0f).OnComplete(() => {
             _readySprite[2].SetActive(false);
             _readySprite[3].SetActive(true);
-            Debug.Log("go");
         }));
 
         sequence.Append(_readySprite[3].transform.DOScale(0.0f, 1.0f).OnComplete(() => {
@@ -284,6 +284,8 @@ public class BattleManager : MonoBehaviour
             }
             else if(alivePlayerNum < 1)
             {
+                _drawSprite.gameObject.SetActive(true);
+                _drawSprite.transform.DOScale(2.0f, 2.0f).SetEase(Ease.OutBounce);
                 _selectButton[0].SetActive(true);
                 _selectButton[0].transform.DOMoveY(BACKBUTTON_Y, 0.5f);
                 _selectButton[1].SetActive(true);

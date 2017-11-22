@@ -78,8 +78,8 @@ public class Player : MapObject
     public static readonly int ISSTAN = 0x40;
     public static readonly int ISMISOBON = 0x80;
 
-    public static readonly float MOVE_TIME_LEVEL_ONE = 0.4f;
-    public static readonly float MOVE_TIME_INTERVAL = 0.04f;
+    public static readonly float MOVE_TIME_LEVEL_ONE = 0.3f;
+    public static readonly float MOVE_TIME_INTERVAL = 0.02f;
 
     [SerializeField]
     private Animator _animator;
@@ -200,6 +200,9 @@ public class Player : MapObject
     /// <param name="direction"></param>
     public void Move(Vector2 direction)
     {
+        // 操作対象が移動中なら処理しない
+        if (_state == Player.STATE.MOVE) return;
+
         // 気絶中なら処理しない
         if (GetStatus(ISSTAN)) return;
 
